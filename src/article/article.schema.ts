@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { ArticleCategory } from './_utils/article-category.enum';
+import { ArticleCategoryEnum } from './_utils/enum/article-category.enum';
+import type { ArticleCategoryType } from './_utils/enum/article-category.enum';
+import { User, UserDocument } from '../users/users.schema';
 
 export type ArticleDocument = HydratedDocument<Article>;
 
@@ -12,22 +14,19 @@ export class Article {
   @Prop({ required: true, type: String, minlength: 30, maxlength: 10000 })
   content: string;
 
-  //rustfs
-  // @Prop({ required: true, type: String })
-  // imageUrl: string;
+  @Prop({ required: true, ref: User.name, type: Types.ObjectId })
+  author: Types.ObjectId | UserDocument;
 
-  @Prop({ required: true, ref: 'User', type: Types.ObjectId })
-  author: Types.ObjectId;
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-  likes: Types.ObjectId[];
+  @Prop({ type: [{ type: Types.ObjectId, ref: User.name }], default: [] })
+  likes: Array<Types.ObjectId | UserDocument>;
 
   @Prop({
     type: String,
-    enum: ArticleCategory,
+    enum: ArticleCategoryEnum,
     required: true,
+    default: ArticleCategoryEnum.BUSINESS,
   })
-  category: ArticleCategory;
+  category: ArticleCategoryType;
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);

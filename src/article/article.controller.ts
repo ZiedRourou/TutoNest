@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ArticleService } from './article.service';
-import { CreateArticleDto } from './_utils/dtos/request/create-article.dto';
-import { UpdateArticleDto } from './_utils/dtos/request/update-article.dto';
+import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
+import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { Protect } from '../auth/_utils/decorator/protect.decorator';
-import { ConnectedUser } from '../users/_utils/decorator/connecter-user.decorator';
-import * as usersSchema from '../users/users.schema';
-import { ArticleByIdPipe } from './_utils/article-by-id-pipe';
+import { ConnectedUser } from '../users/_utils/decorators/connecter-user.decorator';
+import { ArticleByIdPipe } from './_utils/pipes/article-by-id-pipe';
+import type { UserDocument } from '../users/users.schema';
+import type { ArticleDocument } from './article.schema';
 
 @Controller('articles')
 export class ArticleController {
@@ -20,15 +21,15 @@ export class ArticleController {
 
   @ApiOperation({ summary: 'Get article by Id' })
   @Get(':id')
-  getArticleById(@Param('id', ArticleByIdPipe) articleId: string) {
-    return this.articleService.getArticleById(articleId);
+  getArticleById(@Param('id', ArticleByIdPipe) article: ArticleDocument) {
+    return this.articleService.getArticleById(article);
   }
 
   @Protect()
   @ApiOperation({ summary: 'Create article' })
   @ApiBody({ type: CreateArticleDto })
   @Post()
-  postArticle(@ConnectedUser() user: usersSchema.UserDocument, @Body() createArticleDto: CreateArticleDto) {
+  postArticle(@ConnectedUser() user: UserDocument, @Body() createArticleDto: CreateArticleDto) {
     return this.articleService.createArticle(createArticleDto, user);
   }
 
@@ -37,17 +38,17 @@ export class ArticleController {
   @ApiBody({ type: UpdateArticleDto })
   @Patch(':id')
   updateArticle(
-    @ConnectedUser() user: usersSchema.UserDocument,
-    @Param('id') articleId: string,
+    @ConnectedUser() user: UserDocument,
+    @Param('id', ArticleByIdPipe) article: ArticleDocument,
     @Body() updateArticleDto: UpdateArticleDto,
   ) {
-    return this.articleService.updateArticle(articleId, updateArticleDto, user);
+    return this.articleService.updateArticle(article, updateArticleDto, user);
   }
 
   @Protect()
   @ApiOperation({ summary: 'Delete article' })
   @Delete(':id')
-  deleteArticle(@ConnectedUser() user: usersSchema.UserDocument, @Param('id', ArticleByIdPipe) articleId: string) {
-    return this.articleService.deleteArticle(articleId, user);
+  deleteArticle(@ConnectedUser() user: UserDocument, @Param('id', ArticleByIdPipe) article: ArticleDocument) {
+    return this.articleService.deleteArticle(article, user);
   }
 }

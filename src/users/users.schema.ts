@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { UserRoleEnum } from './_utils/user-role.enum';
+import { UserRoleEnum } from './_utils/enum/user-role.enum';
+import type { UserRoleType } from './_utils/enum/user-role.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -18,16 +19,29 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ type: String, default: null })
+  @Prop({
+    type: String,
+    default: null,
+  })
   recoveryToken: string | null;
 
-  @Prop({ type: Date, default: null })
+  @Prop({
+    type: Date,
+    default: null,
+  })
   recoveryTokenExpires: Date | null;
 
-  @Prop({ enum: UserRoleEnum, default: UserRoleEnum.USER })
-  role: UserRoleEnum;
+  @Prop({
+    type: String,
+    enum: UserRoleEnum,
+    default: UserRoleEnum.USER,
+  })
+  role: UserRoleType;
 
-  @Prop({ type: Date, default: null })
+  @Prop({
+    type: Date,
+    default: null,
+  })
   deletedAt: Date | null;
 }
 

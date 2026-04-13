@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ArticleDocument } from './article.schema';
-import { GetArticleDto } from './_utils/dtos/response/get-article.dto';
+import { GetArticleDto } from './_utils/dtos/responses/get-article.dto';
 
 @Injectable()
 export class ArticlesMapper {

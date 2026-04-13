@@ -1,10 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { ArticleRepository } from './article.repository';
-import { CreateArticleDto } from './_utils/dtos/request/create-article.dto';
-import { UpdateArticleDto } from './_utils/dtos/request/update-article.dto';
+import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
+import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
 import { UserDocument } from '../users/users.schema';
 import { ArticlesMapper } from './articles.mapper';
+import { ArticleDocument } from './article.schema';
 
 @Injectable()
 export class ArticleService {
@@ -15,25 +16,19 @@ export class ArticleService {
 
   async createArticle(createArticleDto: CreateArticleDto, user: UserDocument) {
     try {
-      const test = await this.articleRepository.createArticle(createArticleDto, user._id);
-      // .then(this.articleMapper.toGetArticleDto);
+      const newArticle = await this.articleRepository.createArticle(createArticleDto, user._id);
+      return this.articleMapper.toGetArticleDto(newArticle);
     } catch (error) {
       throw new BadRequestException('Failed to create article:' + error.message);
     }
   }
 
-  async updateArticle(articleId: string, updateArticleDto: UpdateArticleDto, user: UserDocument) {
-    const article = await this.articleRepository.getArticleById(articleId);
-
-    if (!article) {
-      throw new NotFoundException('Article not found');
-    }
-
+  async updateArticle(article: ArticleDocument, updateArticleDto: UpdateArticleDto, user: UserDocument) {
     if (!(article.author._id.toString() === user._id.toString())) {
       throw new ForbiddenException('not allowed to update this article');
     }
 
-    const updatedArticle = await this.articleRepository.updateArticle(articleId, updateArticleDto);
+    const updatedArticle = await this.articleRepository.updateArticle(article._id.toString(), updateArticleDto);
 
     if (!updatedArticle) {
       throw new ForbiddenException('not allowed to update this article');
@@ -42,18 +37,12 @@ export class ArticleService {
     return this.articleMapper.toGetArticleDto(updatedArticle);
   }
 
-  async deleteArticle(articleId: string, user: UserDocument) {
-    const article = await this.articleRepository.getArticleById(articleId);
-
-    if (!article) {
-      throw new NotFoundException('Article not found');
-    }
-
+  async deleteArticle(article: ArticleDocument, user: UserDocument) {
     if (!(article.author._id.toString() === user._id.toString())) {
       throw new ForbiddenException('not allowed to update this article');
     }
 
-    const articleDeleted = await this.articleRepository.deleteArticle(articleId);
+    const articleDeleted = await this.articleRepository.deleteArticle(article._id.toString());
 
     if (!articleDeleted) {
       throw new NotFoundException('Article not found');
@@ -64,19 +53,14 @@ export class ArticleService {
 
   async getAllArticles() {
     try {
-      return await this.articleRepository.getAllArticles();
+      const articles = await this.articleRepository.getAllArticles();
+      return articles.map(this.articleMapper.toGetArticleDto);
     } catch (error) {
       throw new BadRequestException('Failed to fetch articles' + error);
     }
   }
 
-  async getArticleById(articleId: string) {
-    const article = await this.articleRepository.getArticleById(articleId);
-
-    if (!article) {
-      throw new NotFoundException('Article not found');
-    }
-
+  async getArticleById(article: ArticleDocument) {
     return this.articleMapper.toGetArticleDto(article);
   }
 }

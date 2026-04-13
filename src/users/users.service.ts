@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './_utils/dto/request/create-user.dto';
+import { CreateUserDto } from './_utils/dtos/requests/create-user.dto';
 import { UsersMapper } from './users.mapper';
 import { UsersRepository } from './users.repository';
 import { UserDocument } from './users.schema';
@@ -17,7 +17,8 @@ export class UsersService {
     if (userExist) {
       throw new ConflictException('Email already exists');
     }
-    await this.usersRepository.createUser(createUserDto).then(this.usersMapper.toGetUserDto);
+    const newUser = await this.usersRepository.createUser(createUserDto);
+    return this.usersMapper.toGetUserDto(newUser);
   }
 
   getUser(user: UserDocument) {

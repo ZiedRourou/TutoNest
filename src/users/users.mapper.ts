@@ -1,4 +1,4 @@
-import { GetUserDto } from './_utils/dto/response/get-user.dto';
+import { GetUserDto } from './_utils/dtos/responses/get-user.dto';
 import { UserDocument } from './users.schema';
 import { Injectable } from '@nestjs/common';
 

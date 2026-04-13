@@ -1,8 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, Length, MaxLength } from 'class-validator';
-import { ArticleCategory } from '../../article-category.enum';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ArticleCategoryEnum } from '../../enum/article-category.enum';
+import type { ArticleCategoryType } from '../../enum/article-category.enum';
 
-export class UpdateArticleDto {
+export class CreateArticleDto {
   @ApiProperty({
     example: 'Guerre au Moyen-Orient : les Etats-Unis et l’Iran annoncent...',
     description: 'Article title',
@@ -26,20 +27,12 @@ export class UpdateArticleDto {
   content: string;
 
   @ApiProperty({
-    enum: ArticleCategory,
-    example: ArticleCategory.TECH,
+    enum: ArticleCategoryEnum,
+    example: ArticleCategoryEnum.TECH,
     description: 'Article category',
   })
-  @IsEnum(ArticleCategory, {
+  @IsEnum(ArticleCategoryEnum, {
     message: 'Article category must be a valid enum value',
   })
-  category: ArticleCategory;
-
-  @ApiPropertyOptional({
-    example: 'https://example.com/image.jpg',
-    description: 'Article image URL',
-  })
-  @IsOptional()
-  @IsUrl({}, { message: 'Image URL must be a valid URL' })
-  imageUrl?: string;
+  category: ArticleCategoryType;
 }

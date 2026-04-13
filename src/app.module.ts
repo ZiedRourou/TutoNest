@@ -5,7 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
-import { CommentModule } from './comment/comment.module';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
 import { AuthModule } from './auth/auth.module';
 
@@ -21,7 +20,6 @@ import { AuthModule } from './auth/auth.module';
     }),
     ArticleModule,
     UsersModule,
-    CommentModule,
     AuthModule,
   ],
   controllers: [UsersController],

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArticleCategory } from '../../article-category.enum';
+import type { ArticleCategoryType } from '../../enum/article-category.enum';
 
 export class GetArticleDto {
   @ApiProperty()
@@ -12,8 +12,5 @@ export class GetArticleDto {
   content: string;
 
   @ApiProperty()
-  category: ArticleCategory;
-
-  @ApiProperty()
-  imageUrl?: string;
+  category: ArticleCategoryType;
 }
