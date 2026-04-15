@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { ArticleCategoryEnum } from './_utils/enum/article-category.enum';
-import type { ArticleCategoryType } from './_utils/enum/article-category.enum';
-import { User, UserDocument } from '../users/users.schema';
+import { User, type UserDocument } from '../users/users.schema';
+import type { ArticleCategoryEnumValueType } from './_utils/types/article-category.type';
 
 export type ArticleDocument = HydratedDocument<Article>;
 
@@ -26,7 +26,7 @@ export class Article {
     required: true,
     default: ArticleCategoryEnum.BUSINESS,
   })
-  category: ArticleCategoryType;
+  category: ArticleCategoryEnumValueType;
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);

@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { UserDocument } from '../../users/users.schema';
 import { ROLES_KEY } from '../_utils/decorator/protect.decorator';
-import { UserRoleEnum, UserRoleType } from '../../users/_utils/enum/user-role.enum';
+import { UserRoleEnum, UserRoleEnumValueType } from '../../users/_utils/enum/user-role.enum';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -15,7 +15,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const isActivated = await super.canActivate(context);
     if (!isActivated) return false;
 
-    const roles = this.reflector.get<UserRoleType[]>(ROLES_KEY, context.getHandler());
+    const roles = this.reflector.get<UserRoleEnumValueType[]>(ROLES_KEY, context.getHandler());
     if (!roles || !roles.length) return true;
 
     const request = context.switchToHttp().getRequest();

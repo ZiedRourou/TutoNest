@@ -4,29 +4,32 @@ import { ArticleDocument } from './article.schema';
 import { Model, Types } from 'mongoose';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
 import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
-export type MongoId = Types.ObjectId | string;
+import { MongoId } from '../_utils/types/mongo-id.type';
+import { User } from '../users/users.schema';
 @Injectable()
 export class ArticleRepository {
   constructor(@InjectModel('Article') private articleModel: Model<ArticleDocument>) {}
-  private readonly orFailNotFound = new NotFoundException('Article not found');
+  private readonly articleNotFoundException = new NotFoundException('Article not found');
 
   createArticle(createArticleDto: CreateArticleDto, userId: Types.ObjectId) {
-    return this.articleModel.create({ ...createArticleDto, author: userId._id });
+    return this.articleModel.create({ ...createArticleDto, author: userId });
   }
 
-  updateArticle(articleId: MongoId, updateArticleDto: UpdateArticleDto) {
-    return this.articleModel.findByIdAndUpdate(articleId, updateArticleDto, { new: true }).exec();
+  updateOrFailArticle(articleId: MongoId, updateArticleDto: UpdateArticleDto) {
+    return this.articleModel
+      .findByIdAndUpdate(articleId, updateArticleDto, { new: true })
+      .orFail(this.articleNotFoundException)
+      .exec();
   }
-
-  deleteArticle(articleId: string) {
-    return this.articleModel.findByIdAndDelete(articleId).exec();
+  deleteOrFailArticle(articleId: MongoId) {
+    return this.articleModel.findByIdAndDelete(articleId).orFail(this.articleNotFoundException).exec();
   }
 
   getAllArticles() {
     return this.articleModel.find().exec();
   }
 
-  findOneByIdOrThrow(id: string) {
-    return this.articleModel.findById(id).orFail(this.orFailNotFound).exec();
+  findOneByIdOrFail(id: MongoId) {
+    return this.articleModel.findById(id).populate(User.name).orFail(this.articleNotFoundException).exec();
   }
 }

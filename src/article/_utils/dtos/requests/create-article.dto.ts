@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, Length, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ArticleCategoryEnum } from '../../enum/article-category.enum';
-import type { ArticleCategoryType } from '../../enum/article-category.enum';
+import type { ArticleCategoryEnumValueType } from '../../types/article-category.type';
 
 export class CreateArticleDto {
   @ApiProperty({
@@ -34,5 +34,5 @@ export class CreateArticleDto {
   @IsEnum(ArticleCategoryEnum, {
     message: 'Article category must be a valid enum value',
   })
-  category: ArticleCategoryType;
+  category: ArticleCategoryEnumValueType;
 }

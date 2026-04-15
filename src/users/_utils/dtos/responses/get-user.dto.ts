@@ -1,5 +1,5 @@
 import { UserRoleEnum } from '../../enum/user-role.enum';
-import type { UserRoleType } from '../../enum/user-role.enum';
+import type { UserRoleEnumValueType } from '../../enum/user-role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetUserDto {
@@ -16,5 +16,5 @@ export class GetUserDto {
   email: string;
 
   @ApiProperty({ enum: UserRoleEnum })
-  role: UserRoleType;
+  role: UserRoleEnumValueType;
 }

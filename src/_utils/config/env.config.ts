@@ -5,20 +5,16 @@ import { Logger } from '@nestjs/common';
 
 export class EnvironmentVariables {
   @IsNumber()
-  PORT: number = 3000;
+  PORT: number;
 
   @IsString()
-  FRONT_URL: string = 'http://localhost:3000';
+  JWT_SECRET: string;
 
   @IsString()
-  JWT_SECRET: string = 'mY-SUp3r-QSHBr3t>wDSSd';
+  JWT_EXPIRATION: string;
 
   @IsString()
-  JWT_EXPIRATION: string = '7d';
-
-  @IsString()
-  // MONGODB_URL: string = 'mongodb://127.0.0.1:27017/nest-skeleton';
-  MONGODB_URL: string = 'mongodb://localhost:27017';
+  MONGODB_URL: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

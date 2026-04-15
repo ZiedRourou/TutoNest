@@ -9,6 +9,6 @@ export class ArticleByIdPipe implements PipeTransform<string, Promise<ArticleDoc
 
   transform(articleId: string) {
     if (!Types.ObjectId.isValid(articleId)) throw new BadRequestException('INVALID_USER_ID');
-    return this.articleRepository.findOneByIdOrThrow(articleId);
+    return this.articleRepository.findOneByIdOrFail(articleId);
   }
 }

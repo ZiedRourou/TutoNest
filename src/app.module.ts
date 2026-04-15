@@ -12,7 +12,6 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     ConfigModule.forRoot({ validate: validateEnv, isGlobal: true }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService<EnvironmentVariables, true>) => ({
         uri: configService.get('MONGODB_URL'),

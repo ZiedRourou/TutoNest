@@ -1,11 +1,11 @@
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../strategies/jwt-auth.guard';
-import { UserRoleType } from '../../../users/_utils/enum/user-role.enum';
+import type { UserRoleEnumValueType } from '../../../users/_utils/enum/user-role.enum';
 
 export const ROLES_KEY = 'roles';
 
-export function Protect(...roles: UserRoleType[]) {
+export function Protect(...roles: UserRoleEnumValueType[]) {
   return applyDecorators(
     SetMetadata(ROLES_KEY, roles),
     ApiBearerAuth(),

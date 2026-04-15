@@ -27,8 +27,6 @@ export class UsersRepository {
     return this.model
       .findByIdAndUpdate(id, {
         password: hashedPassword,
-        recoveryToken: null,
-        recoveryTokenExpires: null,
       })
       .exec();
   }
