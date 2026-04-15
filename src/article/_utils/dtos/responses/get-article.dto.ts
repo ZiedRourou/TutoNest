@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArticleCategoryEnum, type ArticleCategoryEnumValueType } from '../../enum/article-category.enum';
 import { IsEnum, IsString } from 'class-validator';
+import { ArticleCategoryEnum } from '../../enum/article-category.enum';
+import type { ArticleCategoryEnumValueType } from '../../types/article-category.type';
 
 export class GetArticleDto {
   @ApiProperty()
