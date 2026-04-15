@@ -1,0 +1,29 @@
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - mongo
+    expose:
+      - 27017
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: '1M'
+        max-file: '10'
+
+volumes:
+  mongodata:
+
+networks:
+  mongo:
+    name: mongo
+    external: true
