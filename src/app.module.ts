@@ -7,6 +7,7 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
 import { AuthModule } from './auth/auth.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './auth/auth.module';
     ArticleModule,
     UsersModule,
     AuthModule,
+    CommentModule,
   ],
   controllers: [UsersController],
 })

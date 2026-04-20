@@ -13,30 +13,30 @@ import type { CommentDocument } from './comment.schema';
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
-  @ApiOperation({ summary: 'Get all Comments' })
   @Get()
+  @ApiOperation({ summary: 'Get all Comments' })
   getAllComments() {
     return this.commentService.getAllComments();
   }
 
-  @ApiOperation({ summary: 'Get Comment by Id' })
   @Get(':id')
+  @ApiOperation({ summary: 'Get Comment by Id' })
   getCommentById(@Param('id', CommentByIdPipe) comment: CommentDocument) {
     return this.commentService.getCommentById(comment);
   }
 
+  @Post()
   @Protect()
   @ApiOperation({ summary: 'Create Comment' })
   @ApiBody({ type: CreateCommentDto })
-  @Post()
   postComment(@Body() createCommentDto: CreateCommentDto, @ConnectedUser() user: UserDocument) {
     return this.commentService.createComment(createCommentDto, user);
   }
 
+  @Patch(':id')
   @Protect()
   @ApiOperation({ summary: 'Update Comment' })
   @ApiBody({ type: UpdateCommentDto })
-  @Patch(':id')
   updateComment(
     @Param('id', CommentByIdPipe) comment: CommentDocument,
     @Body() updateCommentDto: UpdateCommentDto,
@@ -45,9 +45,9 @@ export class CommentController {
     return this.commentService.updateComment(comment, updateCommentDto, user);
   }
 
+  @Delete(':id')
   @Protect()
   @ApiOperation({ summary: 'Delete Comment' })
-  @Delete(':id')
   deleteComment(@Param('id', CommentByIdPipe) comment: CommentDocument, @ConnectedUser() user: UserDocument) {
     return this.commentService.deleteComment(comment, user);
   }

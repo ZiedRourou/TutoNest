@@ -1,29 +1,84 @@
 services:
-  mongo:
-    image: mongo:8.0
-    container_name: mongo
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+
+#nestjs backend
+  nestjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs_app
+    command: npm run start:dev
+    restart: always
     volumes:
-      - mongodata:/data/db
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
     networks:
-      - mongo
-    expose:
-      - 27017
-    security_opt:
-      - no-new-privileges:true
-    logging:
-      driver: "json-file"
-      options:
-        max-size: '1M'
-        max-file: '10'
+      - app_network
+
+#logto
+  logto:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: svhd/logto:${TAG-latest}
+    container_name: logto
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    environment:
+      - TRUST_PROXY_HEADER=1
+      - DB_URL=postgres://postgres:p0stgr3s@postgres:5432/logto
+      - ENDPOINT
+      - ADMIN_ENDPOINT
+    volumes:
+      - logto_data:/data/db
+    networks:
+      - app_network
+
+#postgre for logto
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    user: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: p0stgr3s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgre_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+#mongodb for nest
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: blogadmin
+      MONGO_INITDB_ROOT_PASSWORD: aqpmwn
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app_network
 
 volumes:
-  mongodata:
+  mongodb_data:
+  logto_data:
+  postgre_data:
 
 networks:
-  mongo:
-    name: mongo
-    external: true
+  app_network:
+    driver: bridge

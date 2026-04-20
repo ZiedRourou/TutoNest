@@ -39,7 +39,7 @@ export class CommentService {
     await this.commentRepository.deleteCommentOrFail(comment._id);
   }
 
-  checkAuthor(comment: CommentDocument, user: UserDocument) {
+  private checkAuthor(comment: CommentDocument, user: UserDocument) {
     if (!comment.author._id.equals(user._id)) throw new ForbiddenException('Not authorized');
   }
 }
