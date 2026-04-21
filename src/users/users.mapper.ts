@@ -6,9 +6,7 @@ import { Injectable } from '@nestjs/common';
 export class UsersMapper {
   toGetUserDto = (user: UserDocument): GetUserDto => ({
     id: user._id.toString(),
-    email: user.email,
-    firstname: user.firstname,
-    lastname: user.lastname,
+    username: user.username,
     role: user.role,
   });
 }

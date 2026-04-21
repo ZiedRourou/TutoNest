@@ -6,7 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
-import { AuthModule } from './auth/auth.module';
+import { LogtoModule } from './logto/logto.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { AuthModule } from './auth/auth.module';
     }),
     ArticleModule,
     UsersModule,
-    AuthModule,
+    CommentModule,
+    LogtoModule,
   ],
   controllers: [UsersController],
 })

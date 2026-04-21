@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, HttpCode, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { Protect } from '../auth/_utils/decorator/protect.decorator';
+import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { UserByIdPipe } from './_utils/pipes/user-by-id.pipe';
 import { UserRoleEnum } from './_utils/enum/user-role.enum';
 import { ConnectedUser } from './_utils/decorators/connecter-user.decorator';
@@ -19,7 +19,6 @@ export class UsersController {
     return this.usersService.getUser(user);
   }
 
-  @Protect(UserRoleEnum.ADMIN)
   @Get(':userId')
   @ApiParam({ type: 'string', name: 'userId' })
   @ApiOperation({ summary: "Get a user's information by its ID." })

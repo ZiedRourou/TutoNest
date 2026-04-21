@@ -7,13 +7,7 @@ export class GetUserDto {
   id: string;
 
   @ApiProperty()
-  firstname: string;
-
-  @ApiProperty()
-  lastname: string;
-
-  @ApiProperty()
-  email: string;
+  username: string;
 
   @ApiProperty({ enum: UserRoleEnum })
   role: UserRoleEnumValueType;

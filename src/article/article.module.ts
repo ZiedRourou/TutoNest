@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ArticleSchema } from './article.schema';
 import { ArticleRepository } from './article.repository';
 import { ArticlesMapper } from './articles.mapper';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: 'Article', schema: ArticleSchema }])],

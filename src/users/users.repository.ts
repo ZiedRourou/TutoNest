@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, QueryFilter } from 'mongoose';
 import { User, UserDocument } from './users.schema';
-import { CreateUserDto } from './_utils/dtos/requests/create-user.dto';
 import { EncryptionService } from 'src/encryption/encryption.service';
+import { AuthInfo } from '../logto/_utils/types/auth-info.types';
 
 @Injectable()
 export class UsersRepository {
@@ -18,30 +18,21 @@ export class UsersRepository {
     return this.model.findById(id).orFail(this.orFailNotFound).exec();
   }
 
-  findOneByEmailOrThrow(email: string) {
-    return this.model.findOne({ email: email, deletedAt: null }).orFail(this.orFailNotFound).exec();
-  }
-
   async updatePasswordById(id: Types.ObjectId, password: string) {
     const hashedPassword = await this.encryptionService.encrypt(password);
-    return this.model
-      .findByIdAndUpdate(id, {
-        password: hashedPassword,
-      })
-      .exec();
+    return this.model.findByIdAndUpdate(id, {
+      password: hashedPassword,
+    });
   }
 
-  userWithEmailExists(email: string) {
-    return this.model.exists({ email: email, deletedAt: null }).exec();
+  async userWithLogtoIdExist(userLogtoId: string): Promise<UserDocument | null> {
+    return this.model.findOne({ userLogtoId });
   }
 
-  async createUser(createUserDto: CreateUserDto) {
-    const hashPassword = await this.encryptionService.encrypt(createUserDto.password);
+  async createUser(createUserDto: AuthInfo) {
     return this.model.create({
-      email: createUserDto.email,
-      firstname: createUserDto.firstname,
-      lastname: createUserDto.lastname,
-      password: hashPassword,
+      username: createUserDto.username,
+      userLogtoId: createUserDto.userLogtoId,
       role: createUserDto.role,
     });
   }

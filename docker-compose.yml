@@ -1,22 +1,27 @@
 services:
 
-#nestjs backend
+  #nestjs backend
   nestjs:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: nestjs_app
+    command: npm run start:dev
     restart: always
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - "3000:3000"
     env_file:
       - .env
     depends_on:
-      - mongodb
-    networks:
-      - app_network
+      mongodb:
+        condition: service_started
+      logto:
+        condition: service_healthy
 
-#logto
+  #logto
   logto:
     depends_on:
       postgres:
@@ -27,6 +32,12 @@ services:
     ports:
       - "3001:3001"
       - "3002:3002"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3001/oidc/.well-known/openid-configuration || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
     environment:
       - TRUST_PROXY_HEADER=1
       - DB_URL=postgres://postgres:p0stgr3s@postgres:5432/logto
@@ -34,10 +45,8 @@ services:
       - ADMIN_ENDPOINT
     volumes:
       - logto_data:/data/db
-    networks:
-      - app_network
 
-#postgre for logto
+  #postgre for logto
   postgres:
     image: postgres:17-alpine
     container_name: postgres
@@ -52,10 +61,8 @@ services:
       retries: 5
     volumes:
       - postgre_data:/var/lib/postgresql/data
-    networks:
-      - app_network
 
-#mongodb for nest
+  #mongodb for nest
   mongodb:
     image: mongo:8
     container_name: mongodb
@@ -67,14 +74,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: aqpmwn
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - app_network
 
 volumes:
   mongodb_data:
   logto_data:
   postgre_data:
 
-networks:
-  app_network:
-    driver: bridge

@@ -29,7 +29,7 @@ export class ArticleService {
 
   async deleteArticle(article: ArticleDocument, currentUser: UserDocument) {
     this.isAuthorOfArticle(article, currentUser);
-    await this.articleRepository.deleteOrFailArticle(article._id.toString());
+    await this.articleRepository.deleteOrFailArticle(article._id);
   }
 
   async getAllArticles() {

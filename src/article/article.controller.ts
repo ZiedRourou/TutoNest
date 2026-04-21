@@ -1,18 +1,22 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
 import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
-import { Protect } from '../auth/_utils/decorator/protect.decorator';
+import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { ConnectedUser } from '../users/_utils/decorators/connecter-user.decorator';
 import { ArticleByIdPipe } from './_utils/pipes/article-by-id-pipe';
 import type { UserDocument } from '../users/users.schema';
 import type { ArticleDocument } from './article.schema';
+import { AccessTokenGuard } from '../logto/_utils/guards/access-token.guard';
+import { UserRoleEnum } from '../users/_utils/enum/user-role.enum';
+import { UserPermissionEnum } from '../users/_utils/enum/user-permission.type';
 
 @Controller('articles')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
+  @Protect({ roles: [UserRoleEnum.ADMIN] })
   @Get()
   @ApiOperation({ summary: 'Get all articles' })
   getAllArticles() {
