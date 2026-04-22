@@ -1,0 +1,80 @@
+services:
+  #nestjs backend
+  nestjs:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    # container_name: nestjs_app
+    command: npm run start:dev
+    restart: always
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      mongodb:
+        condition: service_started
+      logto:
+        condition: service_healthy
+
+  #logto
+  logto:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: svhd/logto:${TAG-latest}
+    container_name: logto
+    entrypoint: ['sh', '-c', 'npm run cli db seed -- --swe && npm start']
+    ports:
+      - '3001:3001'
+      - '3002:3002'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/oidc/.well-known/openid-configuration || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+    environment:
+      - TRUST_PROXY_HEADER=1
+      - DB_URL=${DB_URL}
+      - ENDPOINT
+      - ADMIN_ENDPOINT
+    volumes:
+      - logto_data:/data/db
+
+  #postgre for logto
+  postgres:
+    image: postgres:17-alpine
+    # container_name: postgres
+    user: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgre_data:/var/lib/postgresql/data
+
+  #mongodb for nest
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+  logto_data:
+  postgre_data:
