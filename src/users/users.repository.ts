@@ -15,7 +15,7 @@ export class UsersRepository {
   ) {}
 
   findOneByIdOrThrow(id: string) {
-    return this.model.findById(id).orFail(this.orFailNotFound).exec();
+    return this.model.findOne({ userLogtoId: id }).orFail(this.orFailNotFound).exec();
   }
 
   async updatePasswordById(id: Types.ObjectId, password: string) {

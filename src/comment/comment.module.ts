@@ -8,7 +8,7 @@ import { CommentMapper } from './comment.mapper';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Comment', schema: CommentSchema }])],
+  imports: [MongooseModule.forFeature([{ name: 'Comment', schema: CommentSchema }]), UsersModule],
   controllers: [CommentController],
   exports: [CommentService, CommentRepository],
   providers: [CommentService, CommentRepository, CommentMapper],

@@ -11,15 +11,19 @@ import { decodeLogtoPayload, LogtoPayload } from './_utils/schemas/logto-payload
 import { extractBearerToken } from './_utils/functions/extract-bearer-token.function';
 import { LogtoMapper } from './logto.mapper';
 import type { Jwks, JwksUris } from './_utils/types/jwks-set.types';
+import { UsersService } from '../users/users.service';
+import { UserDocument } from '../users/users.schema';
+import { Types } from 'mongoose';
+import { AuthorId } from '../users/_utils/types/author.type';
 
 @Injectable()
 export class LogtoService {
-  private readonly ONE_DAY_MS = 24 * 60 * 60 * 1000;
   constructor(
     private readonly logtoRequests: LogtoRequests,
     private readonly logtoMapper: LogtoMapper,
     @Inject(LOGTO_JWKS_TOKEN) private readonly jwks: Jwks,
     @Inject(LOGTO_URIS_TOKEN) private readonly logtoUris: JwksUris,
+    private readonly userService: UsersService,
   ) {}
 
   getUserInformations = (id: string) => this.logtoRequests.fetchUserInformations(id);
@@ -53,6 +57,7 @@ export class LogtoService {
     const sub = payload.sub;
     if (!sub) throw new BadRequestException('Invalid Payload');
 
-    return this.logtoMapper.toAuthInfo(payload);
+    const user: UserDocument = await this.userService.findUserOrFail(payload.userLogtoId);
+    return this.logtoMapper.toAuthInfo(payload, user);
   }
 }

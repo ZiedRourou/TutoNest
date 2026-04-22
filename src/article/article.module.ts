@@ -8,7 +8,7 @@ import { ArticlesMapper } from './articles.mapper';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Article', schema: ArticleSchema }])],
+  imports: [MongooseModule.forFeature([{ name: 'Article', schema: ArticleSchema }]), UsersModule],
   controllers: [ArticleController],
   exports: [ArticleService, ArticleRepository],
   providers: [ArticleService, ArticleRepository, ArticlesMapper],

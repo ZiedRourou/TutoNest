@@ -15,6 +15,10 @@ export class UsersService {
     return this.usersMapper.toGetUserDto(user);
   }
 
+  async findUserOrFail(userLogtoId: string) {
+    return await this.usersRepository.findOneByIdOrThrow(userLogtoId);
+  }
+
   async findOrCreateUser(userInfo: AuthInfo): Promise<UserDocument> {
     const existing = await this.usersRepository.userWithLogtoIdExist(userInfo.userLogtoId);
 
