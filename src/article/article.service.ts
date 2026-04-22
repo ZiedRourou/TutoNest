@@ -6,6 +6,7 @@ import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
 import { UserDocument } from '../users/users.schema';
 import { ArticlesMapper } from './articles.mapper';
 import { ArticleDocument } from './article.schema';
+import { checkAuthor } from 'src/_utils/config/functions/functions';
 
 @Injectable()
 export class ArticleService {
@@ -21,14 +22,14 @@ export class ArticleService {
   }
 
   async updateArticle(article: ArticleDocument, updateArticleDto: UpdateArticleDto, user: UserDocument) {
-    this.isAuthorOfArticle(article, user);
+    checkAuthor(article, user);
     const updatedArticle = await this.articleRepository.updateOrFailArticle(article._id.toString(), updateArticleDto);
 
     return this.articleMapper.toGetArticleDto(updatedArticle);
   }
 
   async deleteArticle(article: ArticleDocument, currentUser: UserDocument) {
-    this.isAuthorOfArticle(article, currentUser);
+    checkAuthor(article, currentUser);
     await this.articleRepository.deleteOrFailArticle(article._id.toString());
   }
 
@@ -42,11 +43,11 @@ export class ArticleService {
     return this.articleMapper.toGetArticleDto(article);
   }
 
-  isAuthorOfArticle(article: ArticleDocument, user: UserDocument): void {
-    const authorId = article.author._id;
+  // isAuthorOfArticle(article: ArticleDocument, user: UserDocument): void {
+  //   const authorId = article.author._id;
 
-    if (authorId !== user._id) {
-      throw new ForbiddenException('Not allowed to modify this article');
-    }
-  }
+  //   if (authorId !== user._id) {
+  //     throw new ForbiddenException('Not allowed to modify this article');
+  //   }
+  // }
 }

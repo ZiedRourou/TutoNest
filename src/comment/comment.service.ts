@@ -5,6 +5,8 @@ import { UpdateCommentDto } from './_utils/dto/requests/update-comment.dto';
 import { CommentRepository } from './comment.repository';
 import { CommentMapper } from './comment.mapper';
 import { CommentDocument } from './comment.schema';
+import { GenericArticleOrComment } from 'src/_utils/types/generic.type';
+import { checkAuthor } from 'src/_utils/config/functions/functions';
 
 @Injectable()
 export class CommentService {
@@ -28,18 +30,14 @@ export class CommentService {
   }
 
   async updateComment(comment: CommentDocument, updateCommentDto: UpdateCommentDto, user: UserDocument) {
-    this.checkAuthor(comment, user);
+    checkAuthor(comment, user);
     const updateComment = await this.commentRepository.updateCommentOrFail(comment._id, updateCommentDto);
 
     return this.commentMapper.toGetCommentDto(updateComment);
   }
 
   async deleteComment(comment: CommentDocument, user: UserDocument) {
-    this.checkAuthor(comment, user);
+    checkAuthor(comment, user);
     await this.commentRepository.deleteCommentOrFail(comment._id);
-  }
-
-  private checkAuthor(comment: CommentDocument, user: UserDocument) {
-    if (!comment.author._id.equals(user._id)) throw new ForbiddenException('Not authorized');
   }
 }
