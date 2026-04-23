@@ -15,10 +15,8 @@ export class Comment {
   @Prop({ required: true, ref: User.name, type: Types.ObjectId })
   author: Types.ObjectId | UserDocument;
 
-  @Prop({ default: now() })
   createdAt: Date;
 
-  @Prop({ default: now() })
   updatedAt: Date;
 }
 
