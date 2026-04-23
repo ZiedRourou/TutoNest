@@ -29,14 +29,14 @@ export class UsersController {
   }
 
   @Protect()
-  @Patch()
+  @Patch('my-role')
   @ApiOperation({ summary: 'Choose role' })
   @ApiBody({ type: NewUserRoleDto })
   updateUserRole(@ConnectedUser() user: UserDocument, @Body() newRole: NewUserRoleDto) {
     return this.usersService.updateUserRole(user, newRole);
   }
 
-  @Delete('me')
+  @Delete('delete-my-account')
   @Protect()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete my account' })
