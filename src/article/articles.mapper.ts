@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ArticleDocument } from './article.schema';
+import { ArticleDocument } from './_utils/schemas/article.schema';
 import { GetArticleDto } from './_utils/dtos/responses/get-article.dto';
 
 @Injectable()

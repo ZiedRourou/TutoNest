@@ -1,5 +1,5 @@
 export const UserRoleEnum = {
   ADMIN: 'ADMIN',
-  AUTHOR: 'AUTHOR',
+  AUTHOR: 'ibshcyeo5vluac9a56tao',
   LECTOR: 'LECTOR',
 } as const satisfies Record<string, string>;

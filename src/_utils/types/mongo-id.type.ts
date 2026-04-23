@@ -1,3 +1,3 @@
 import { Types } from 'mongoose';
 
-export type MongoId = Types.ObjectId | string;
+export type MongoId<T> = Types.ObjectId | T;

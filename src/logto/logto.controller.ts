@@ -1,16 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { UsersService } from '../users/users.service';
 import { LoginOrRegister } from './_utils/decorators/loginOrRegister.decorator';
 import { ConnectedUser } from '../users/_utils/decorators/connecter-user.decorator';
 import type { UserDocument } from '../users/users.schema';
 
-@Controller('logto')
+@Controller('auth')
 export class LogtoController {
   constructor(private readonly userService: UsersService) {}
 
   @LoginOrRegister()
-  @Get('auth')
+  @Get('register')
   @ApiOperation({ summary: 'Check if user exist or register' })
   getCurrentUser(@ConnectedUser() user: UserDocument) {
     return this.userService.getUser(user);

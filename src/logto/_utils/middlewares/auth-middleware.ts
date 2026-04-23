@@ -1,25 +1,15 @@
 import { IncomingHttpHeaders } from 'http';
-
-export class AuthorizationError extends Error {
-  name = 'AuthorizationError';
-  constructor(
-    message: string,
-    public status = 403,
-  ) {
-    super(message);
-  }
-}
+import { BEARER_PREFIX } from '../../../_utils/constants';
+import { AuthorizationError } from '../errors/authorization-error.types';
 
 export function extractBearerTokenFromHeaders({ authorization }: IncomingHttpHeaders): string {
-  const bearerPrefix = 'Bearer ';
-
   if (!authorization) {
     throw new AuthorizationError('Authorization header is missing', 401);
   }
 
-  if (!authorization.startsWith(bearerPrefix)) {
-    throw new AuthorizationError(`Authorization header must start with "${bearerPrefix}"`, 401);
+  if (!authorization.startsWith(BEARER_PREFIX)) {
+    throw new AuthorizationError(`Authorization header must start with "${BEARER_PREFIX}"`, 401);
   }
 
-  return authorization.slice(bearerPrefix.length);
+  return authorization.slice(BEARER_PREFIX.length);
 }

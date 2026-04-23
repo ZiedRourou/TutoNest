@@ -5,7 +5,7 @@ import { UserDocument } from '../users/users.schema';
 
 @Injectable()
 export class LogtoMapper {
-  toAuthInfo = (payload: LogtoPayload, user: UserDocument): AuthInfo => ({
+  toAuthInfo = (payload: LogtoPayload, user?: UserDocument): AuthInfo => ({
     sub: payload.sub,
     clientId: payload.client_id,
     userLogtoId: payload.userLogtoId,

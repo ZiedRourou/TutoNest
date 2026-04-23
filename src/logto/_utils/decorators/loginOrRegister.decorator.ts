@@ -15,7 +15,7 @@ export function LoginOrRegister(_opts?: ProtectOptions) {
   return applyDecorators(
     SetMetadata(ROLES_KEY, _opts),
     ApiBearerAuth(),
-    UseGuards(AccessTokenGuard, CheckRegisteredUserGuard),
+    UseGuards(CheckRegisteredUserGuard),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),
   );
 }

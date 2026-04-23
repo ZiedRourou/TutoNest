@@ -5,6 +5,7 @@ import { ProtectOptions } from '../decorators/protect.decorator';
 import { AuthInfo } from '../types/auth-info.types';
 import { UserPermissionEnumValueType } from '../../../users/_utils/types/user-permission.type';
 import { UserRoleEnumValueType } from '../../../users/_utils/types/user-role.type';
+import { AuthorizationError } from '../errors/authorization-error.types';
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
@@ -37,6 +38,6 @@ export class RolesGuard implements CanActivate {
     )
       return true;
 
-    throw new ForbiddenException('Insufficient permissions or roles to access this resource');
+    throw new AuthorizationError('Insufficient permissions or roles to access this resource');
   }
 }

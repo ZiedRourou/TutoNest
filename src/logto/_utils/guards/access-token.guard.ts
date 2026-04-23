@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { extractBearerTokenFromHeaders } from '../middlewares/auth-middleware';
 import { LogtoService } from '../../logto.service';
+import { AuthorizationError } from '../errors/authorization-error.types';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -15,8 +16,7 @@ export class AccessTokenGuard implements CanActivate {
       request.auth = await this.logtoService.createAuthInfo(payload);
       return true;
     } catch (error) {
-      if (error.status === 401) throw new UnauthorizedException(error.message || 'Unauthorized');
-      throw new ForbiddenException(error.message);
+      throw new AuthorizationError(error.message);
     }
   }
 }

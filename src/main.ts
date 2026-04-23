@@ -26,6 +26,6 @@ async function bootstrap() {
   SwaggerModule.setup('api/doc', app, document, SwaggerCustomOptionsConfig);
 
   const configService = app.get(ConfigService<EnvironmentVariables, true>);
-  return app.listen(configService.get('PORT'));
+  return app.listen(configService.get('NESTJS_PORT'));
 }
 bootstrap();

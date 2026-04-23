@@ -1,6 +1,8 @@
 import { Schema } from 'effect';
 
 const LogtoUserCustomClaim = Schema.Struct({
+  //a fixer car plusiers roles possible mais
+  // j'ai fais en sorte que logto renvoi e premier role de l'array
   role: Schema.required(Schema.String),
   username: Schema.required(Schema.String),
   userLogtoId: Schema.required(Schema.String),

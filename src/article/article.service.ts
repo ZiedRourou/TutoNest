@@ -1,11 +1,15 @@
-import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { ArticleRepository } from './article.repository';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
 import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
 import { UserDocument } from '../users/users.schema';
 import { ArticlesMapper } from './articles.mapper';
-import { ArticleDocument } from './article.schema';
+import { ArticleDocument } from './_utils/schemas/article.schema';
+import { MongoId } from '../_utils/types/mongo-id.type';
+import { assertIsAuthor } from '../_utils/functions/is-author-function';
+import { ARTICLE_NAME_ERROR } from '../_utils/constants';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class ArticleService {
@@ -21,14 +25,28 @@ export class ArticleService {
   }
 
   async updateArticle(article: ArticleDocument, updateArticleDto: UpdateArticleDto, user: UserDocument) {
-    this.isAuthorOfArticle(article, user);
-    const updatedArticle = await this.articleRepository.updateOrFailArticle(article._id.toString(), updateArticleDto);
+    assertIsAuthor(article._id, user._id, ARTICLE_NAME_ERROR);
+    const updatedArticle = await this.articleRepository.updateOrFailArticle(article._id, updateArticleDto);
 
     return this.articleMapper.toGetArticleDto(updatedArticle);
   }
+  async likeArticle(article: ArticleDocument, user: UserDocument) {
+    const isAlreadyLiked = await this.isUserAlreadyLikeArticle(article._id, user._id);
+    if (isAlreadyLiked) return;
+    await this.articleRepository.likeArticleByUser(article._id, user._id);
 
+    return;
+  }
+
+  async dislikeArticle(article: ArticleDocument, user: UserDocument) {
+    const isAlreadyLiked = await this.isUserAlreadyLikeArticle(article._id, user._id);
+    if (!isAlreadyLiked) return;
+    await this.articleRepository.dislikeArticleByUser(article._id, user._id);
+
+    return;
+  }
   async deleteArticle(article: ArticleDocument, currentUser: UserDocument) {
-    this.isAuthorOfArticle(article, currentUser);
+    assertIsAuthor(article._id, currentUser._id, ARTICLE_NAME_ERROR);
     await this.articleRepository.deleteOrFailArticle(article._id);
   }
 
@@ -42,11 +60,11 @@ export class ArticleService {
     return this.articleMapper.toGetArticleDto(article);
   }
 
-  isAuthorOfArticle(article: ArticleDocument, user: UserDocument): void {
-    const authorId = article.author._id;
+  async getArticleByIdWithStat(article: ArticleDocument) {
+    return;
+  }
 
-    if (authorId !== user._id) {
-      throw new ForbiddenException('Not allowed to modify this article');
-    }
+  private async isUserAlreadyLikeArticle(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
+    return this.articleRepository.isArticleLikedByUser(articleId, userId);
   }
 }

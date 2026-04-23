@@ -1,21 +1,29 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from 'src/_utils/constants';
-import { ProtectOptions } from '../decorators/protect.decorator';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthInfo } from '../types/auth-info.types';
-import { UserPermissionEnumValueType } from '../../../users/_utils/types/user-permission.type';
-import { UserRoleEnumValueType } from '../../../users/_utils/types/user-role.type';
 import { UsersService } from '../../../users/users.service';
+import { extractBearerTokenFromHeaders } from '../middlewares/auth-middleware';
+import { LogtoService } from '../../logto.service';
+import { AuthorizationError } from '../errors/authorization-error.types';
 
 @Injectable()
 export class CheckRegisteredUserGuard implements CanActivate {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly logtoService: LogtoService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const authInfo = request.auth as AuthInfo;
-    const user = await this.userService.findOrCreateUser(authInfo);
-    request.user = user;
-    return true;
+
+    try {
+      const token = extractBearerTokenFromHeaders(request.headers);
+      const payload = await this.logtoService.validateJwt(token);
+      request.auth = await this.logtoService.createNewUserAuthInfo(payload);
+      const authInfo = request.auth as AuthInfo;
+      request.auth.user = await this.userService.findOrCreateUser(authInfo);
+      return true;
+    } catch (error) {
+      throw new AuthorizationError(error.message);
+    }
   }
 }

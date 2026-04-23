@@ -1,5 +1,4 @@
 import { BadRequestException, ConflictException, createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { LogtoUser } from '../../../logto/_utils/types/responses/responses.type';
 import { UserDocument } from '../../users.schema';
 
 export const ConnectedUser = createParamDecorator((_, ctx: ExecutionContext): UserDocument => {

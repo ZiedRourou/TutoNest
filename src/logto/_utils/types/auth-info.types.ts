@@ -7,5 +7,5 @@ export class AuthInfo {
   public readonly scopes: string[];
   public readonly role: string;
   public readonly username: string;
-  public readonly user: UserDocument;
+  public readonly user?: UserDocument;
 }

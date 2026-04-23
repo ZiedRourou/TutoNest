@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { LOGTO_CLIENT_TOKEN, LOGTO_TENANT_ID } from 'src/_utils/constants';
 import type { LogtoClient } from 'src/logto/_utils/types/logto.types';
-import { LogtoResponseType, LogtoUser } from 'src/logto/_utils/types/responses/responses.type';
+import { LogtoResponseType } from 'src/logto/_utils/types/responses/responses.type';
 import { LogtoExceptions } from './_utils/errors/logto-exceptions.types';
-import { GetUsersQuery } from './_utils/types/requests/get-users-query.types';
+import { NewUserRoleDto } from '../users/_utils/dtos/requests/new-user-role.dto';
+import { MongoId } from '../_utils/types/mongo-id.type';
 
 @Injectable()
 export class LogtoRequests {
@@ -20,78 +21,20 @@ export class LogtoRequests {
     private readonly exceptions: LogtoExceptions,
   ) {}
 
-  /**
-   * GET /api/users/{userId}
-   * Fetch user information by user ID.
-   * @link https://openapi.logto.io/operation/operation-getuser
-   * @param userId
-   * @returns User information
-   */
-  fetchUserInformations = (userId: string) =>
+  updateUserRole = (userId: MongoId<string>, dto: NewUserRoleDto) =>
     this.handleResponse(
-      this.logtoClient.GET(`/api/users/{userId}`, {
-        params: {
-          path: { userId: userId },
-        },
-      }),
-      this.exceptions.ERROR_FETCH_USER_INFORMATIONS,
-    );
-
-  /**
-   * POST /api/users/{userId}/password/verify
-   * Verify user password.
-   * @link https://openapi.logto.io/operation/operation-verifyuserpassword
-   * @param userId
-   * @param password
-   * @returns Success response
-   */
-  verifyUserPassword = (userId: string, password: string) =>
-    this.handleResponse(
-      this.logtoClient.POST(`/api/users/{userId}/password/verify`, {
-        params: {
-          path: { userId: userId },
-        },
-        body: {
-          password,
-        },
-      }),
-      this.exceptions.ERROR_VERIFY_USER_PASSWORD,
-    );
-
-  /**
-   * PATCH /api/users/{userId}/password
-   * Update user password.
-   * @link https://openapi.logto.io/operation/operation-updateuserpassword
-   * @param userId
-   * @param password
-   * @returns Success response
-   */
-  updateUserPassword = (userId: string, password: string) =>
-    this.handleResponse(
-      this.logtoClient.PATCH(`/api/users/{userId}/password`, {
-        params: {
-          path: { userId: userId },
-        },
-        body: {
-          password,
-        },
+      // pas fini faut sup le role de logto avant d'attribuer le nouv role
+      this.logtoClient.POST(`/api/users/{userId}/roles`, {
+        params: { path: { userId: userId.toString() } },
+        body: { roleIds: [dto.role] },
       }),
       this.exceptions.ERROR_UPDATE_USER_PASSWORD,
     );
 
-  /**
-   * DELETE /api/users/{userId}
-   * Delete a user by user ID.
-   * @link https://openapi.logto.io/operation/operation-deleteuser
-   * @param userId
-   * @returns Success response
-   */
-  deleteUser = (userId: string) =>
+  deleteUser = (userId: MongoId<string>) =>
     this.handleResponse(
       this.logtoClient.DELETE(`/api/users/{userId}`, {
-        params: {
-          path: { userId: userId },
-        },
+        params: { path: { userId: userId.toString() } },
       }),
       this.exceptions.ERROR_DELETE_USER,
     );
@@ -123,23 +66,7 @@ export class LogtoRequests {
     if (res.response?.status) {
       const status = res.response.status;
       const errorMessage = error?.message || 'Request failed';
-
-      switch (status) {
-        case 400:
-          throw new BadRequestException(errorMessage);
-        case 401:
-          throw new UnauthorizedException(errorMessage);
-        case 403:
-          throw new ForbiddenException(errorMessage);
-        case 404:
-          throw new NotFoundException(errorMessage);
-        case 409:
-          throw new BadRequestException(errorMessage);
-        default:
-          if (status >= 500) {
-            throw new InternalServerErrorException(errorMessage);
-          }
-      }
+      this.throwError(status, errorMessage);
     }
 
     if (!res.data) {
@@ -148,14 +75,22 @@ export class LogtoRequests {
     return res.data;
   };
 
-  getUsers = (query?: GetUsersQuery): Promise<LogtoUser[]> => {
-    return this.handleResponse<LogtoUser[]>(
-      this.logtoClient.GET('/api/users', {
-        params: {
-          query,
-        },
-      }),
-      this.exceptions.ERROR_FETCH_USER_INFORMATIONS,
-    );
-  };
+  private throwError(status: number, errorMessage: string) {
+    switch (status) {
+      case 400:
+        throw new BadRequestException(errorMessage);
+      case 401:
+        throw new UnauthorizedException(errorMessage);
+      case 403:
+        throw new ForbiddenException(errorMessage);
+      case 404:
+        throw new NotFoundException(errorMessage);
+      case 409:
+        throw new BadRequestException(errorMessage);
+      default:
+        if (status >= 500) {
+          throw new InternalServerErrorException(errorMessage);
+        }
+    }
+  }
 }
