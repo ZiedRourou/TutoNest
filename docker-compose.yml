@@ -75,4 +75,3 @@ volumes:
   mongodb_data:
   logto_data:
   postgre_data:
-
