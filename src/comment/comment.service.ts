@@ -22,7 +22,7 @@ export class CommentService {
       const comments = await this.commentRepository.getAllComments();
       return comments.map(this.commentMapper.toGetCommentDto);
     } catch (e) {
-      throw new this.commentExceptionsTypes.ERROR_FAIL_GET_COMMENT();
+      throw this.commentExceptionsTypes.ERROR_FAIL_GET_COMMENT;
     }
   }
 
@@ -40,13 +40,13 @@ export class CommentService {
   }
 
   async updateComment(comment: CommentDocument, updateCommentDto: UpdateCommentDto, user: UserDocument) {
-    assertIsAuthor(comment, user, DocumentEnum.COMMENT);
+    assertIsAuthor(comment._id, user._id, DocumentEnum.COMMENT);
     const updateComment = await this.commentRepository.updateCommentOrFail(comment._id, updateCommentDto);
     return this.commentMapper.toGetCommentDto(updateComment);
   }
 
   async deleteComment(comment: CommentDocument, user: UserDocument) {
-    assertIsAuthor(comment, user, DocumentEnum.COMMENT);
+    assertIsAuthor(comment._id, user._id, DocumentEnum.COMMENT);
     await this.commentRepository.deleteCommentOrFail(comment._id);
   }
 }
