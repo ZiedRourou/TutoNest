@@ -27,6 +27,10 @@ export class Article {
     default: ArticleCategoryEnum.BUSINESS,
   })
   category: ArticleCategoryEnumValueType;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CommentDocument } from './comment.schema';
-import { GetCommentDto } from './_utils/dto/responses/get-comment.dto';
+import { CommentDocument } from './_utils/schemas/comment.schema';
+import { GetCommentDto } from './_utils/dtos/responses/get-comment.dto';
 
 @Injectable()
 export class CommentMapper {

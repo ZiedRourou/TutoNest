@@ -10,6 +10,7 @@ import { MongoId } from '../_utils/types/mongo-id.type';
 import { assertIsAuthor } from '../_utils/functions/is-author-function';
 import { ARTICLE_NAME_ERROR } from '../_utils/constants';
 import { Types } from 'mongoose';
+import { DocumentEnum } from 'src/_utils/enums/document_category.enum';
 
 @Injectable()
 export class ArticleService {
@@ -25,7 +26,7 @@ export class ArticleService {
   }
 
   async updateArticle(article: ArticleDocument, updateArticleDto: UpdateArticleDto, user: UserDocument) {
-    assertIsAuthor(article._id, user._id, ARTICLE_NAME_ERROR);
+    assertIsAuthor(article._id, user._id, DocumentEnum.ARTICLE);
     const updatedArticle = await this.articleRepository.updateOrFailArticle(article._id, updateArticleDto);
 
     return this.articleMapper.toGetArticleDto(updatedArticle);
@@ -46,7 +47,7 @@ export class ArticleService {
     return;
   }
   async deleteArticle(article: ArticleDocument, currentUser: UserDocument) {
-    assertIsAuthor(article._id, currentUser._id, ARTICLE_NAME_ERROR);
+    assertIsAuthor(article._id, currentUser._id, DocumentEnum.ARTICLE);
     await this.articleRepository.deleteOrFailArticle(article._id);
   }
 

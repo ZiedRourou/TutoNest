@@ -2,12 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { CommentService } from './comment.service';
-import { CreateCommentDto } from './_utils/dto/requests/create-comment.dto';
-import { UpdateCommentDto } from './_utils/dto/requests/update-comment.dto';
+import { CreateCommentDto } from './_utils/dtos/requests/create-comment.dto';
+import { UpdateCommentDto } from './_utils/dtos/requests/update-comment.dto';
 import { ConnectedUser } from '../users/_utils/decorators/connecter-user.decorator';
 import { CommentByIdPipe } from './_utils/pipes/comment-by-id-pipe';
 import type { UserDocument } from '../users/users.schema';
-import type { CommentDocument } from './comment.schema';
+import type { CommentDocument } from './_utils/schemas/comment.schema';
 
 @Controller('comment')
 export class CommentController {

@@ -1,23 +1,29 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreateCommentDto } from './_utils/dto/requests/create-comment.dto';
+import { CreateCommentDto } from './_utils/dtos/requests/create-comment.dto';
 import { UserDocument } from '../users/users.schema';
-import { UpdateCommentDto } from './_utils/dto/requests/update-comment.dto';
+import { UpdateCommentDto } from './_utils/dtos/requests/update-comment.dto';
 import { CommentRepository } from './comment.repository';
 import { CommentMapper } from './comment.mapper';
-import { CommentDocument } from './comment.schema';
-import { GenericArticleOrComment } from 'src/_utils/types/generic.type';
-import { checkAuthor } from 'src/_utils/config/functions/functions';
+import { CommentDocument } from './_utils/schemas/comment.schema';
+import { CommentExceptionsTypes } from './_utils/errors/comment-exceptions.types';
+import { assertIsAuthor } from 'src/_utils/functions/is-author-function';
+import { DocumentEnum } from 'src/_utils/enums/document_category.enum';
 
 @Injectable()
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
     private readonly commentMapper: CommentMapper,
+    private readonly commentExceptionsTypes: CommentExceptionsTypes,
   ) {}
 
   async getAllComments() {
-    const comments = await this.commentRepository.getAllComments();
-    return comments.map(this.commentMapper.toGetCommentDto);
+    try {
+      const comments = await this.commentRepository.getAllComments();
+      return comments.map(this.commentMapper.toGetCommentDto);
+    } catch (e) {
+      throw new this.commentExceptionsTypes.ERROR_FAIL_GET_COMMENT();
+    }
   }
 
   async getCommentById(comment: CommentDocument) {
@@ -25,19 +31,22 @@ export class CommentService {
   }
 
   async createComment(createCommentDto: CreateCommentDto, user: UserDocument) {
-    const newComment = await this.commentRepository.createComment(createCommentDto, user._id);
-    return this.commentMapper.toGetCommentDto(newComment);
+    try {
+      const newComment = await this.commentRepository.createComment(createCommentDto, user._id);
+      return this.commentMapper.toGetCommentDto(newComment);
+    } catch (e) {
+      throw this.commentExceptionsTypes.ERROR_FAIL_CREATE_COMMENT;
+    }
   }
 
   async updateComment(comment: CommentDocument, updateCommentDto: UpdateCommentDto, user: UserDocument) {
-    checkAuthor(comment, user);
+    assertIsAuthor(comment, user, DocumentEnum.COMMENT);
     const updateComment = await this.commentRepository.updateCommentOrFail(comment._id, updateCommentDto);
-
     return this.commentMapper.toGetCommentDto(updateComment);
   }
 
   async deleteComment(comment: CommentDocument, user: UserDocument) {
-    checkAuthor(comment, user);
+    assertIsAuthor(comment, user, DocumentEnum.COMMENT);
     await this.commentRepository.deleteCommentOrFail(comment._id);
   }
 }
