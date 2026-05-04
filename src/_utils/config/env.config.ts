@@ -1,5 +1,5 @@
 import { exit } from 'process';
-import { IsNumber, IsString, ValidateNested, validateSync } from 'class-validator';
+import { IsEmail, IsNumber, IsString, ValidateNested, validateSync } from 'class-validator';
 import { plainToInstance, Type } from 'class-transformer';
 import { Logger } from '@nestjs/common';
 
@@ -63,6 +63,12 @@ export class SmtpConfig {
 
   @IsNumber()
   SMTP_PORT: number;
+
+  @IsEmail()
+  SMTP_SENDER_EMAIL: string;
+
+  @IsString()
+  SMTP_SENDER_NAME: string;
 }
 
 export class EnvironmentVariables {
@@ -114,6 +120,7 @@ export function validateEnv(config: Record<string, unknown>) {
     SMTP: {
       SMTP_HOST: config.SMTP_HOST,
       SMTP_PORT: config.SMTP_PORT,
+      SMTP_SENDER: config.SMTP_SENDER,
     },
   };
 

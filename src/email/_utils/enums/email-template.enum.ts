@@ -1,5 +1,5 @@
 export enum EmailTemplate {
-  CONTACT = 'welcome',
+  WELCOME = 'welcome',
   UPDATE_PROFILE = 'update-profile',
   DELETE_ACCOUNT = 'delete-account',
 }

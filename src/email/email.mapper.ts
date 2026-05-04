@@ -7,19 +7,25 @@ import { EmailTemplate } from './_utils/enums/email-template.enum.js';
 
 @Injectable()
 export class EmailMapper {
-  constructor(private readonly configService: ConfigService<EnvironmentVariables, true>) {}
+  private readonly senderEmail: string;
+  private readonly senderName: string;
 
-  // private readonly smtpConfig: SMTPConfig = this.configService.get<SMTPConfig>('SMTP');
+  constructor(configService: ConfigService<EnvironmentVariables, true>) {
+    const smtp = configService.get('SMTP');
+    this.senderEmail = smtp.SMTP_SENDER_EMAIL;
+    this.senderName = smtp.SMTP_SENDER_NAME;
+  }
+
   mapToUserRegisteredEmail = (dto: UserLogtoEmailTypes): EmailData => ({
-    from: { name: 'TutoNest Blog', address: 'this.senderEmail' },
+    from: { name: this.senderName, address: this.senderEmail },
     to: dto.email,
     subject: 'Bienvenue sur le Blog !',
-    template: EmailTemplate.CONTACT,
+    template: EmailTemplate.WELCOME,
     context: { username: dto.username, email: dto.email },
   });
 
   mapToUserProfileUpdatedEmail = (dto: UserLogtoEmailTypes): EmailData => ({
-    from: { name: 'TutoNest Blog', address: 'this.senderEmail' },
+    from: { name: this.senderName, address: this.senderEmail },
     to: dto.email,
     subject: 'Mise à jour de votre profil',
     template: EmailTemplate.UPDATE_PROFILE,
@@ -27,7 +33,7 @@ export class EmailMapper {
   });
 
   mapToUserAccountDeletedEmail = (dto: { email: string; username: string }): EmailData => ({
-    from: { name: 'TutoNest Blog', address: 'this.senderEmail' },
+    from: { name: this.senderName, address: this.senderEmail },
     to: dto.email,
     subject: 'Confirmation de suppression de compte',
     template: EmailTemplate.DELETE_ACCOUNT,
