@@ -1,0 +1,47 @@
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+  style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #111827; background-color: #f9fafb; padding: 32px 24px;">
+  <tr>
+    <td
+      style="max-width: 640px; margin: 0 auto; background: #ffffff; padding: 32px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);">
+      {{> header}}
+
+      <p style="margin: 0 0 12px 0; font-size: 16px;">Bonjour,</p>
+
+      <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.5;">
+        Un utilisateur a envoyé un message via la section de contact dans {{productName}}.
+      </p>
+
+      <table cellpadding="0" cellspacing="0" border="0"
+        style="width: 100%; margin: 12px 0 20px 0; font-size: 15px; color: #1f2937;">
+        <tr>
+          <td style="padding: 6px 0; width: 140px; font-weight: 600;">Nom :</td>
+          <td style="padding: 6px 0;">{{name}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; width: 140px; font-weight: 600;">Email :</td>
+          <td style="padding: 6px 0;">{{email}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; width: 140px; font-weight: 600;">Organization :</td>
+          <td style="padding: 6px 0;">{{nameOrganization}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; width: 140px; font-weight: 600;">Date :</td>
+          <td style="padding: 6px 0;">{{sentAt}}</td>
+        </tr>
+      </table>
+
+      <p style="margin: 0 0 10px 0; font-size: 15px; font-weight: 600;">Message :</p>
+      <p
+        style="margin: 0 0 18px 0; padding: 12px; background: #f3f4f6; border-radius: 10px; font-size: 15px; line-height: 1.6;">
+        {{messageContent}}
+      </p>
+
+      <p style="margin: 0 0 12px 0; font-size: 15px; line-height: 1.5;">
+        Vous pouvez recontacter l'utilisateur via l'email indiqué.
+      </p>
+
+      <p style="margin: 20px 0 0 0; font-size: 15px;">Cordialement,<br />L'équipe Oreus</p>
+    </td>
+  </tr>
+</table>
