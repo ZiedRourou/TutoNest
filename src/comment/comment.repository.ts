@@ -18,7 +18,7 @@ export class CommentRepository {
     return this.commentModel.find();
   }
 
-  findOneByIdOrThrow(commentId: MongoId<string>) {
+  findOneByIdOrThrow(commentId: MongoId) {
     return this.commentModel.findById(commentId).orFail(this.commentExceptionTypes.ERROR_NOT_FOUND_COMMENT).exec();
   }
 
@@ -26,14 +26,14 @@ export class CommentRepository {
     return this.commentModel.create({ ...createCommentDto, author: userId._id });
   }
 
-  updateCommentOrFail(commentId: MongoId<Types.ObjectId>, updateCommentDto: UpdateCommentDto) {
+  updateCommentOrFail(commentId: MongoId, updateCommentDto: UpdateCommentDto) {
     return this.commentModel
       .findByIdAndUpdate(commentId, updateCommentDto, { new: true })
       .orFail(this.commentExceptionTypes.ERROR_UPDATE_COMMENT)
       .exec();
   }
 
-  deleteCommentOrFail(commentId: MongoId<Types.ObjectId>) {
+  deleteCommentOrFail(commentId: MongoId) {
     return this.commentModel
       .findByIdAndDelete(commentId)
       .orFail(this.commentExceptionTypes.ERROR_DELETE_COMMENT)

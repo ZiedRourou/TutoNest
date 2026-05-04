@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ArticleDocument } from './_utils/schemas/article.schema';
 import { GetArticleDto } from './_utils/dtos/responses/get-article.dto';
+import { GetArticleWithStatsDto } from './_utils/dtos/responses/get-article-with-stats.dto';
+
+export type ArticleWithStatsRaw = ArticleDocument & { commentsCount: number };
 
 @Injectable()
 export class ArticlesMapper {
@@ -10,4 +13,13 @@ export class ArticlesMapper {
     content: article.content,
     category: article.category,
   });
+
+  toGetArticleWithStatsDto = (article: ArticleWithStatsRaw): GetArticleWithStatsDto => {
+    const baseArticle = this.toGetArticleDto(article);
+
+    return {
+      ...baseArticle,
+      commentsCount: article.commentsCount || 0,
+    };
+  };
 }

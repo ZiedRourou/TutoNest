@@ -1,12 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { UserByIdPipe } from './_utils/pipes/user-by-id.pipe';
 import { UserRoleEnum } from './_utils/enum/user-role.enum';
 import { ConnectedUser } from './_utils/decorators/connecter-user.decorator';
 import type { UserDocument } from './users.schema';
-import { NewUserRoleDto } from './_utils/dtos/requests/new-user-role.dto';
+import * as responsesType from '../logto/_utils/types/responses/responses.type';
+import type { LogtoUser } from '../logto/_utils/types/responses/responses.type';
+import { UpdateAccountDto } from './_utils/dtos/requests/update-user-dto';
+import { UpdateUserPasswordDto } from './_utils/dtos/requests/update-user-password.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -29,27 +32,30 @@ export class UsersController {
   }
 
   @Protect()
-  @Patch('role')
-  @ApiOperation({ summary: 'Choose role' })
-  @ApiBody({ type: NewUserRoleDto })
-  updateUserRole(@ConnectedUser() user: UserDocument, @Body() newRole: NewUserRoleDto) {
-    return this.usersService.updateUserRole(user, newRole);
+  @Patch('me')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  updateAccount(@ConnectedUser() user: LogtoUser, @Body() dto: UpdateAccountDto) {
+    //pour le role je sais toujours pas qui faire le front doit pas plutot envoyer l'id du role directement ?
+    return this.usersService.updateAccount(user, dto);
   }
 
-  @Delete('delete')
   @Protect()
+  @Patch('me/password')
+  @ApiOperation({ summary: 'Update the connected user password' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete my account' })
-  deleteUserMe(@ConnectedUser() user: UserDocument) {
-    return this.usersService.deleteUser(user);
+  updateUserPassword(
+    @ConnectedUser() user: responsesType.LogtoUser,
+    @Body() updateUserPasswordDto: UpdateUserPasswordDto,
+  ) {
+    return this.usersService.updateUserPassword(user, updateUserPasswordDto);
   }
 
-  @Delete(':userId')
-  @Protect({ roles: [UserRoleEnum.ADMIN] })
+  @Protect()
+  @Delete('me')
+  @ApiOperation({ summary: 'Delete the connected user account' })
+  @ApiResponse({ status: 204, description: 'Account successfully deleted' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiParam({ type: 'string', name: 'userId' })
-  @ApiOperation({ summary: 'Delete user by id' })
-  deleteUser(@Param('userId', UserByIdPipe) user: UserDocument) {
-    return this.usersService.deleteUser(user);
+  deleteAccount(@ConnectedUser() user: LogtoUser) {
+    return this.usersService.deleteAccount(user);
   }
 }

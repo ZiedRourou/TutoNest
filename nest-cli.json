@@ -2,7 +2,19 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
+
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "assets": [
+      {
+        "include": "email/templates/*.hbs",
+        "watchAssets": true
+      },
+      {
+        "include": "email/templates/partials/*.hbs",
+        "watchAssets": true
+      }
+    ],
+    "plugins": ["@nestjs/swagger"]
   }
 }

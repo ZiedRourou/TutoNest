@@ -14,32 +14,61 @@ export class ArticleRepository {
     private readonly articleException: ArticleExceptionsTypes,
   ) {}
 
-  createArticle(createArticleDto: CreateArticleDto, userId: MongoId<UserDocument>) {
-    return this.articleModel.create({ ...createArticleDto, author: userId });
+  createArticle(createArticleDto: CreateArticleDto, userId: MongoId) {
+    return this.articleModel.create({ ...createArticleDto, author: new Types.ObjectId(userId) });
   }
 
-  updateOrFailArticle(articleId: MongoId<Types.ObjectId>, updateArticleDto: UpdateArticleDto) {
+  updateOrFailArticle(articleId: MongoId, updateArticleDto: UpdateArticleDto) {
     return this.articleModel
       .findByIdAndUpdate(articleId, updateArticleDto, { new: true })
       .orFail(this.articleException.ERROR_UPDATE_ARTICLE)
       .exec();
   }
-  deleteOrFailArticle(articleId: MongoId<Types.ObjectId>) {
+  deleteOrFailArticle(articleId: MongoId) {
     return this.articleModel.findByIdAndDelete(articleId).orFail(this.articleException.ERROR_DELETE_ARTICLE).exec();
   }
 
-  isArticleLikedByUser(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
+  async getArticleWithStats(articleId: MongoId) {
+    return this.articleModel
+      .aggregate([
+        {
+          $match: { _id: new Types.ObjectId(articleId) },
+        },
+        {
+          $lookup: {
+            from: 'comments',
+            localField: '_id',
+            foreignField: 'article',
+            as: 'commentsData',
+          },
+        },
+        {
+          $addFields: {
+            commentsCount: { $size: '$commentsData' },
+            hasComments: { $gt: [{ $size: '$commentsData' }, 0] },
+          },
+        },
+        {
+          $project: {
+            commentsData: 0,
+          },
+        },
+      ])
+      .exec();
+  }
+
+  isArticleLikedByUser(articleId: MongoId, userId: MongoId) {
     return this.articleModel.exists({ _id: articleId, likes: userId });
   }
 
-  likeArticleByUser(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
+  likeArticleByUser(articleId: MongoId, userId: MongoId) {
     return this.articleModel
       .findByIdAndUpdate(articleId, { $addToSet: { likes: userId } })
       .orFail(this.articleException.ERROR_LIKE_ARTICLE)
       .exec();
   }
 
-  dislikeArticleByUser(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
+  dislikeArticleByUser(articleId: MongoId, userId: MongoId) {
     return this.articleModel
       .findByIdAndUpdate(articleId, { $pull: { likes: userId } })
       .orFail(this.articleException.ERROR_LIKE_ARTICLE)
@@ -50,7 +79,7 @@ export class ArticleRepository {
     return this.articleModel.find();
   }
 
-  findOneByIdOrFail(id: MongoId<string>) {
+  findOneByIdOrFail(id: MongoId) {
     return this.articleModel
       .findById(id)
       .populate(User.name)

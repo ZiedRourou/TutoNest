@@ -40,6 +40,7 @@ export class ArticleController {
     description: 'ObjectId Of article',
   })
   getArticleByIdWithStat(@Param('id', ArticleByIdPipe) article: ArticleDocument) {
+    //pas finis je regarde encore l'aggregation
     return this.articleService.getArticleByIdWithStat(article);
   }
 

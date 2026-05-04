@@ -24,6 +24,10 @@ export class User {
     default: null,
   })
   deletedAt: Date | null;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

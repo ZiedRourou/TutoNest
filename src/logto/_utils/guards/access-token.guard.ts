@@ -16,6 +16,7 @@ export class AccessTokenGuard implements CanActivate {
       request.auth = await this.logtoService.createAuthInfo(payload);
       return true;
     } catch (error) {
+      // @ts-ignore
       throw new AuthorizationError(error.message);
     }
   }

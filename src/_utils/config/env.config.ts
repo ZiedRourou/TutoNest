@@ -27,6 +27,9 @@ export class LogtoConfig {
 
   @IsString()
   LOGTO_ADMIN_ENDPOINT: string;
+
+  @IsString()
+  LOGTO_WEBHOOK_SIGNING_KEY: string;
 }
 
 export class MongoConfig {
@@ -54,6 +57,14 @@ export class PostgresConfig {
   POSTGRES_DB: string;
 }
 
+export class SmtpConfig {
+  @IsString()
+  SMTP_HOST: string;
+
+  @IsNumber()
+  SMTP_PORT: number;
+}
+
 export class EnvironmentVariables {
   @IsNumber()
   NESTJS_PORT: number;
@@ -69,6 +80,10 @@ export class EnvironmentVariables {
   @ValidateNested()
   @Type(() => PostgresConfig)
   POSTGRES: PostgresConfig;
+
+  @ValidateNested()
+  @Type(() => SmtpConfig)
+  SMTP: SmtpConfig;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
@@ -89,11 +104,16 @@ export function validateEnv(config: Record<string, unknown>) {
       LOGTO_TAG: config.LOGTO_TAG,
       LOGTO_ENDPOINT: config.LOGTO_ENDPOINT,
       LOGTO_ADMIN_ENDPOINT: config.LOGTO_ADMIN_ENDPOINT,
+      LOGTO_WEBHOOK_SIGNING_KEY: config.LOGTO_WEBHOOK_SIGNING_KEY,
     },
     POSTGRES: {
       POSTGRES_USER: config.POSTGRES_USER,
       POSTGRES_PASSWORD: config.POSTGRES_PASSWORD,
       POSTGRES_DB: config.POSTGRES_DB,
+    },
+    SMTP: {
+      SMTP_HOST: config.SMTP_HOST,
+      SMTP_PORT: config.SMTP_PORT,
     },
   };
 

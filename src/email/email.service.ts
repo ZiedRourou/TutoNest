@@ -1,27 +1,17 @@
-import * as fs from 'node:fs'
-import path from 'node:path'
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
-import { MailerService } from '@nestjs-modules/mailer'
-import * as Handlebars from 'handlebars'
-import { LogtoUserWithOrganizations } from 'src/logto/_utils/types/user-with-organization.type'
-import { SendContactEmailDto } from 'src/users/_utils/dto/requests/send-contact-email.dto'
-import { SendLogtoEmailDto } from './_utils/dto/send-logto-email.dto'
-import { EmailData } from './_utils/types/email-data'
-import { JitUserEmail } from './_utils/types/jit-user-email.type'
-import { EmailMapper } from './email.mapper'
+import { Injectable, Logger } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
+import { UserLogtoEmailTypes } from './_utils/types/user-logto-email.types.js';
+import { EmailMapper } from './email.mapper.js';
+import { EmailData } from './_utils/types/email-data.js';
 
 @Injectable()
-export class EmailService implements OnModuleInit {
-  private readonly logger = new Logger(EmailService.name)
+export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
 
   constructor(
     private readonly mailerService: MailerService,
     private readonly emailMapper: EmailMapper,
   ) {}
-
-  onModuleInit() {
-    this.registerPartials()
-  }
 
   private async sendEmail(emailData: EmailData) {
     try {
@@ -30,52 +20,23 @@ export class EmailService implements OnModuleInit {
         to: emailData.to,
         subject: emailData.subject,
         template: emailData.template,
-        context: emailData.context,
-        attachments: emailData.attachments,
-      })
+        ...(emailData.context !== undefined && { context: emailData.context }),
+        ...(emailData.attachments !== undefined && { attachments: emailData.attachments }),
+      });
     } catch (e) {
-      this.logger.error('Failed to send email', e)
+      this.logger.error('Failed to send email', e);
     }
   }
 
-  sendContactEmail = (user: LogtoUserWithOrganizations, dto: SendContactEmailDto) => {
-    const context = {
-      productName: dto.productName,
-      name: user.name ?? 'No name',
-      email: user.primaryEmail ?? '',
-      nameOrganization: user.currentOrganization.name,
-      messageContent: dto.messageContent,
-    }
-    const emailData = this.emailMapper.mapToContactEmail(context)
-    return this.sendEmail(emailData)
+  async sendNewUserRegistered(dto: UserLogtoEmailTypes) {
+    return this.sendEmail(this.emailMapper.mapToUserRegisteredEmail(dto));
   }
 
-  async sendJitUserJoinedEmail(dto: JitUserEmail) {
-    const emailData = this.emailMapper.mapToJitUserJoined(dto)
-    return this.sendEmail(emailData)
+  async sendUserProfileUpdated(dto: UserLogtoEmailTypes) {
+    return this.sendEmail(this.emailMapper.mapToUserProfileUpdatedEmail(dto));
   }
 
-  async sendLogtoEmail(dto: SendLogtoEmailDto) {
-    const emailData = await this.emailMapper.mapToLogtoEmail(dto)
-    return this.sendEmail(emailData)
-  }
-
-  private registerPartials() {
-    const partialsDir = path.join(__dirname, 'templates', 'partials')
-    if (!fs.existsSync(partialsDir)) {
-      this.logger.warn(`Email partials directory not found at ${partialsDir}, skipping partial registration`)
-      return
-    }
-
-    const filenames = fs.readdirSync(partialsDir)
-
-    filenames.forEach((filename) => {
-      const matches = /^([^.]+).hbs$/.exec(filename)
-      if (!matches) return
-
-      const name = matches[1]
-      const template = fs.readFileSync(path.join(partialsDir, filename), 'utf8')
-      Handlebars.registerPartial(name, template)
-    })
+  async sendUserAccountDeleted(dto: { email: string; username: string }) {
+    return this.sendEmail(this.emailMapper.mapToUserAccountDeletedEmail(dto));
   }
 }

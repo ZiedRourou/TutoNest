@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
-
-import { ArticleModule } from './article/article.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersController } from './users/users.controller';
-import { UsersModule } from './users/users.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ArticleModule } from './article/article.module';
 import { EnvironmentVariables, MongoConfig, validateEnv } from './_utils/config/env.config';
-import { LogtoModule } from './logto/logto.module';
+import { UsersModule } from './users/users.module';
 import { CommentModule } from './comment/comment.module';
+import { LogtoModule } from './logto/logto.module';
+import { EmailModule } from './email/email.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
+import { UsersController } from './users/users.controller';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { CommentModule } from './comment/comment.module';
     UsersModule,
     CommentModule,
     LogtoModule,
+    EmailModule,
+    WebhooksModule,
   ],
-  controllers: [UsersController],
 })
 export class AppModule {}

@@ -62,10 +62,16 @@ export class ArticleService {
   }
 
   async getArticleByIdWithStat(article: ArticleDocument) {
-    return;
+    const statsArray = await this.articleRepository.getArticleWithStats(article._id.toString());
+
+    if (!statsArray) {
+      return this.articleMapper.toGetArticleDto(article);
+    }
+    const articleWithStats = statsArray[0];
+    return this.articleMapper.toGetArticleWithStatsDto(articleWithStats);
   }
 
-  private async isUserAlreadyLikeArticle(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
+  private async isUserAlreadyLikeArticle(articleId: MongoId, userId: MongoId) {
     return this.articleRepository.isArticleLikedByUser(articleId, userId);
   }
 }
