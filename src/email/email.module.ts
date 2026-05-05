@@ -31,7 +31,7 @@ import { EnvironmentEnum } from '../_utils/enums/environnement-enum';
             dir: templatesDir,
             adapter: new HandlebarsAdapter(),
             options: {
-              strict: false,
+              strict: true,
             },
           },
         };
