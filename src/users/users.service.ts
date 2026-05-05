@@ -9,6 +9,7 @@ import { UpdateAccountDto } from './_utils/dtos/requests/update-user-dto';
 import { LogtoRequests } from '../logto/logto.requests';
 import { MongoId } from '../_utils/types/mongo-id.type';
 import { UpdateUserPasswordDto } from './_utils/dtos/requests/update-user-password.dto';
+import { LogtoId } from '../logto/_utils/types/logto.types';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +26,7 @@ export class UsersService {
     return this.usersMapper.toGetUserDto(user);
   }
 
-  async findUserOrFail(userLogtoId: MongoId) {
+  async findUserOrFail(userLogtoId: LogtoId) {
     return await this.usersRepository.findOneByIdOrThrow(userLogtoId);
   }
 
@@ -36,26 +37,15 @@ export class UsersService {
       return existing;
     }
 
-    const newUser = await this.usersRepository.createUser(logtoUser);
-
-    if (!newUser) {
-      throw this.userException.ERROR_CREATE_USER_MONGO_DB;
-    }
-
-    return newUser;
+    return await this.usersRepository.createUser(logtoUser);
   }
 
-  async updateUserByLogtoId(logtoId: MongoId, updateData: UpdateAccountDto) {
-    const updatedUser = await this.usersRepository.updateByLogtoId(logtoId, updateData);
-
-    if (!updatedUser) {
-      throw this.userException.ERROR_NOT_FOUND_USER;
-    }
-
-    return updatedUser;
+  async updateUserByLogtoId(logtoId: LogtoId, updateData: UpdateAccountDto) {
+    await this.usersRepository.updateByLogtoId(logtoId, updateData);
+    return;
   }
 
-  async removeUserByLogtoId(logtoId: MongoId) {
+  async removeUserByLogtoId(logtoId: LogtoId) {
     const result = await this.usersRepository.deleteByLogtoId(logtoId);
 
     if (!result) {

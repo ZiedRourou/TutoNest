@@ -22,8 +22,8 @@ export class CommentRepository {
     return this.commentModel.findById(commentId).orFail(this.commentExceptionTypes.ERROR_NOT_FOUND_COMMENT).exec();
   }
 
-  createComment(createCommentDto: CreateCommentDto, userId: Types.ObjectId) {
-    return this.commentModel.create({ ...createCommentDto, author: userId._id });
+  createComment(createCommentDto: CreateCommentDto, userId: MongoId) {
+    return this.commentModel.create({ ...createCommentDto, author: new Types.ObjectId(userId) });
   }
 
   updateCommentOrFail(commentId: MongoId, updateCommentDto: UpdateCommentDto) {

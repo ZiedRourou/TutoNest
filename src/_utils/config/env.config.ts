@@ -1,7 +1,9 @@
 import { exit } from 'process';
-import { IsEmail, IsNumber, IsString, ValidateNested, validateSync } from 'class-validator';
+import { IsEmail, IsEnum, IsNumber, IsString, ValidateNested, validateSync } from 'class-validator';
 import { plainToInstance, Type } from 'class-transformer';
 import { Logger } from '@nestjs/common';
+import { EnvironmentEnum } from '../enums/environnement-enum';
+import type { EnvironnementEnumValueType } from '../types/environnement-type';
 
 export class LogtoConfig {
   @IsString()
@@ -44,6 +46,9 @@ export class MongoConfig {
 
   @IsString()
   MONGO_PASSWORD: string;
+
+  @IsString()
+  MONGO_TAG: string;
 }
 
 export class PostgresConfig {
@@ -55,6 +60,9 @@ export class PostgresConfig {
 
   @IsString()
   POSTGRES_DB: string;
+
+  @IsString()
+  POSTGRES_TAG: string;
 }
 
 export class SmtpConfig {
@@ -69,6 +77,9 @@ export class SmtpConfig {
 
   @IsString()
   SMTP_SENDER_NAME: string;
+
+  @IsString()
+  MAILHOG_TAG: string;
 }
 
 export class EnvironmentVariables {
@@ -90,6 +101,9 @@ export class EnvironmentVariables {
   @ValidateNested()
   @Type(() => SmtpConfig)
   SMTP: SmtpConfig;
+
+  @IsEnum(EnvironmentEnum)
+  NODE_ENV: EnvironnementEnumValueType;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
@@ -100,6 +114,7 @@ export function validateEnv(config: Record<string, unknown>) {
       MONGO_PORT: config.MONGO_PORT,
       MONGO_USER: config.MONGO_USER,
       MONGO_PASSWORD: config.MONGO_PASSWORD,
+      MONGO_TAG: config.MONGO_TAG,
     },
     LOGTO: {
       LOGTO_BASE_URL: config.LOGTO_BASE_URL,
@@ -116,12 +131,16 @@ export function validateEnv(config: Record<string, unknown>) {
       POSTGRES_USER: config.POSTGRES_USER,
       POSTGRES_PASSWORD: config.POSTGRES_PASSWORD,
       POSTGRES_DB: config.POSTGRES_DB,
+      POSTGRES_TAG: config.POSTGRES_TAG,
     },
     SMTP: {
       SMTP_HOST: config.SMTP_HOST,
       SMTP_PORT: config.SMTP_PORT,
-      SMTP_SENDER: config.SMTP_SENDER,
+      SMTP_SENDER_EMAIL: config.SMTP_SENDER_EMAIL,
+      SMTP_SENDER_NAME: config.SMTP_SENDER_NAME,
+      MAILHOG_TAG: config.MAILHOG_TAG,
     },
+    NODE_ENV: config.NODE_ENV,
   };
 
   const validatedConfig = plainToInstance(EnvironmentVariables, structuredConfig, {

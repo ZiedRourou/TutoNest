@@ -13,6 +13,18 @@ export class EmailService {
     private readonly emailMapper: EmailMapper,
   ) {}
 
+  async sendNewUserRegistered(dto: UserLogtoEmailTypes) {
+    return this.sendEmail(this.emailMapper.toUserRegisteredEmail(dto));
+  }
+
+  async sendUserProfileUpdated(dto: UserLogtoEmailTypes) {
+    return this.sendEmail(this.emailMapper.toUserProfileUpdatedEmail(dto));
+  }
+
+  async sendUserAccountDeleted(dto: { email: string; username: string }) {
+    return this.sendEmail(this.emailMapper.toUserAccountDeletedEmail(dto));
+  }
+
   private async sendEmail(emailData: EmailData) {
     try {
       await this.mailerService.sendMail({
@@ -20,23 +32,11 @@ export class EmailService {
         to: emailData.to,
         subject: emailData.subject,
         template: emailData.template,
-        ...(emailData.context !== undefined && { context: emailData.context }),
-        ...(emailData.attachments !== undefined && { attachments: emailData.attachments }),
+        ...(emailData.context && { context: emailData.context }),
+        ...(emailData.attachments && { attachments: emailData.attachments }),
       });
     } catch (e) {
       this.logger.error('Failed to send email', e);
     }
-  }
-
-  async sendNewUserRegistered(dto: UserLogtoEmailTypes) {
-    return this.sendEmail(this.emailMapper.mapToUserRegisteredEmail(dto));
-  }
-
-  async sendUserProfileUpdated(dto: UserLogtoEmailTypes) {
-    return this.sendEmail(this.emailMapper.mapToUserProfileUpdatedEmail(dto));
-  }
-
-  async sendUserAccountDeleted(dto: { email: string; username: string }) {
-    return this.sendEmail(this.emailMapper.mapToUserAccountDeletedEmail(dto));
   }
 }

@@ -13,3 +13,5 @@ export type LogtoClient = Client<paths>;
  * The client credentials instance used for authentication.
  */
 export type LogtoClientCredentials = ClientCredentials;
+
+export type LogtoId = string;

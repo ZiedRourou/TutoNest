@@ -31,24 +31,17 @@ export class ArticleService {
 
     return this.articleMapper.toGetArticleDto(updatedArticle);
   }
-  async likeArticle(article: ArticleDocument, user: UserDocument) {
+  async toggleLike(article: ArticleDocument, user: UserDocument, like: boolean) {
     const isAlreadyLiked = await this.isUserAlreadyLikeArticle(article._id, user._id);
-    if (isAlreadyLiked) return;
-    await this.articleRepository.likeArticleByUser(article._id, user._id);
-
+    if (isAlreadyLiked === like) return;
+    await this.articleRepository.toggleLikeArticle(article._id, user._id, like);
     return;
   }
 
-  async dislikeArticle(article: ArticleDocument, user: UserDocument) {
-    const isAlreadyLiked = await this.isUserAlreadyLikeArticle(article._id, user._id);
-    if (!isAlreadyLiked) return;
-    await this.articleRepository.dislikeArticleByUser(article._id, user._id);
-
-    return;
-  }
   async deleteArticle(article: ArticleDocument, currentUser: UserDocument) {
     assertIsAuthor(article._id, currentUser._id, DocumentEnum.ARTICLE);
     await this.articleRepository.deleteOrFailArticle(article._id);
+    return;
   }
 
   async getAllArticles() {
@@ -62,7 +55,7 @@ export class ArticleService {
   }
 
   async getArticleByIdWithStat(article: ArticleDocument) {
-    const statsArray = await this.articleRepository.getArticleWithStats(article._id.toString());
+    const statsArray = await this.articleRepository.getArticleWithStats(article._id);
 
     if (!statsArray) {
       return this.articleMapper.toGetArticleDto(article);
@@ -72,6 +65,6 @@ export class ArticleService {
   }
 
   private async isUserAlreadyLikeArticle(articleId: MongoId, userId: MongoId) {
-    return this.articleRepository.isArticleLikedByUser(articleId, userId);
+    return this.articleRepository.isUserAlreadyLikeArticle(articleId, userId);
   }
 }

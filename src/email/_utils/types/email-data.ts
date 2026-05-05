@@ -1,16 +1,16 @@
-import { EmailTemplate } from '../enums/email-template.enum';
+import { EmailTemplateEnumValueType } from './email-template-type';
 
-export interface EmailAttachment {
+export type EmailAttachment = {
   filename: string;
   path: string;
   cid?: string;
-}
+};
 
-export interface EmailData {
+export type EmailData = {
   from: { name: string; address: string };
   to: string;
   subject: string;
-  template: EmailTemplate;
-  context?: Record<string, any>;
+  template: EmailTemplateEnumValueType;
+  context?: Record<string, unknown>;
   attachments?: EmailAttachment[];
-}
+};

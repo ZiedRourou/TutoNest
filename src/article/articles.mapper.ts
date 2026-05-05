@@ -19,7 +19,7 @@ export class ArticlesMapper {
 
     return {
       ...baseArticle,
-      commentsCount: article.commentsCount || 0,
+      commentsCount: article.commentsCount ?? 0,
     };
   };
 }

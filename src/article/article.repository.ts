@@ -29,48 +29,27 @@ export class ArticleRepository {
   }
 
   async getArticleWithStats(articleId: MongoId) {
-    return this.articleModel
-      .aggregate([
-        {
-          $match: { _id: new Types.ObjectId(articleId) },
-        },
-        {
-          $lookup: {
-            from: 'comments',
-            localField: '_id',
-            foreignField: 'article',
-            as: 'commentsData',
-          },
-        },
-        {
-          $addFields: {
-            commentsCount: { $size: '$commentsData' },
-            hasComments: { $gt: [{ $size: '$commentsData' }, 0] },
-          },
-        },
-        {
-          $project: {
-            commentsData: 0,
-          },
-        },
-      ])
+    const result = this.articleModel
+      .aggregate()
+      .match({ _id: new Types.ObjectId(articleId) })
+      .lookup({ from: 'comments', localField: '_id', foreignField: 'article', as: 'commentsData' })
+      .addFields({ commentsCount: { $size: '$commentsData' } })
+      .project({ commentsData: 0 })
       .exec();
+
+    return result[0] ?? null;
   }
 
-  isArticleLikedByUser(articleId: MongoId, userId: MongoId) {
-    return this.articleModel.exists({ _id: articleId, likes: userId });
+  async isUserAlreadyLikeArticle(articleId: MongoId, userId: MongoId): Promise<boolean> {
+    const result = await this.articleModel.exists({ _id: articleId, likes: userId });
+    return !!result;
   }
 
-  likeArticleByUser(articleId: MongoId, userId: MongoId) {
+  toggleLikeArticle(articleId: MongoId, userId: MongoId, like: boolean) {
+    const update = like ? { $addToSet: { likes: userId } } : { $pull: { likes: userId } };
+
     return this.articleModel
-      .findByIdAndUpdate(articleId, { $addToSet: { likes: userId } })
-      .orFail(this.articleException.ERROR_LIKE_ARTICLE)
-      .exec();
-  }
-
-  dislikeArticleByUser(articleId: MongoId, userId: MongoId) {
-    return this.articleModel
-      .findByIdAndUpdate(articleId, { $pull: { likes: userId } })
+      .findByIdAndUpdate(articleId, update)
       .orFail(this.articleException.ERROR_LIKE_ARTICLE)
       .exec();
   }

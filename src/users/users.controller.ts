@@ -40,7 +40,7 @@ export class UsersController {
   }
 
   @Protect()
-  @Patch('me/password')
+  @Patch('password')
   @ApiOperation({ summary: 'Update the connected user password' })
   @HttpCode(HttpStatus.NO_CONTENT)
   updateUserPassword(

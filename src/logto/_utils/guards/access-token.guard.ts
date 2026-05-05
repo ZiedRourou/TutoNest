@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { extractBearerTokenFromHeaders } from '../middlewares/auth-middleware';
 import { LogtoService } from '../../logto.service';
 import { AuthorizationError } from '../errors/authorization-error.types';
@@ -16,7 +16,6 @@ export class AccessTokenGuard implements CanActivate {
       request.auth = await this.logtoService.createAuthInfo(payload);
       return true;
     } catch (error) {
-      // @ts-ignore
       throw new AuthorizationError(error.message);
     }
   }

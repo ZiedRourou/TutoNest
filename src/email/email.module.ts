@@ -6,6 +6,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.ad
 import { EnvironmentVariables } from '../_utils/config/env.config';
 import { EmailService } from './email.service';
 import { EmailMapper } from './email.mapper';
+import { EnvironmentEnum } from '../_utils/enums/environnement-enum';
 
 @Module({
   imports: [
@@ -17,7 +18,14 @@ import { EmailMapper } from './email.mapper';
           transport: {
             host: configService.get('SMTP').SMTP_HOST,
             port: configService.get('SMTP').SMTP_PORT,
-            secure: false,
+            secure: configService.get('NODE_ENV') === EnvironmentEnum.Production,
+            auth:
+              configService.get('NODE_ENV') === EnvironmentEnum.Production
+                ? {
+                    user: configService.get('SMTP').SMTP_USER,
+                    pass: configService.get('SMTP').SMTP_PASS,
+                  }
+                : undefined,
           },
           template: {
             dir: templatesDir,

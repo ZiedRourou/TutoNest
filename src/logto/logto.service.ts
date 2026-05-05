@@ -40,6 +40,9 @@ export class LogtoService {
   }
 
   async updateAccount(user: LogtoUser, dto: UpdateAccountDto) {
+    if (!dto.username) {
+      throw new BadRequestException('Username is required');
+    }
     await this.logtoRequests.updateUserProfile(user.id, dto);
   }
 

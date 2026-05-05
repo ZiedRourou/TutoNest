@@ -62,13 +62,12 @@ export class ArticleController {
     description: 'ObjectId Of article',
   })
   likeArticle(@ConnectedUser() user: UserDocument, @Param('id', ArticleByIdPipe) article: ArticleDocument) {
-    return this.articleService.likeArticle(article, user);
+    return this.articleService.toggleLike(article, user, true);
   }
 
   @Patch(':id/dislike')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Protect()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Dislike article' })
   @ApiParam({
     name: 'id',
@@ -76,7 +75,7 @@ export class ArticleController {
     description: 'ObjectId Of article',
   })
   dislikeArticle(@ConnectedUser() user: UserDocument, @Param('id', ArticleByIdPipe) article: ArticleDocument) {
-    return this.articleService.dislikeArticle(article, user);
+    return this.articleService.toggleLike(article, user, false);
   }
 
   @Patch(':id')

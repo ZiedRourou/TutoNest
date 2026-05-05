@@ -1,6 +1,7 @@
 import { IncomingHttpHeaders } from 'http';
 import { BEARER_PREFIX } from '../../../_utils/constants';
 import { AuthorizationError } from '../errors/authorization-error.types';
+import { UnauthorizedException } from '@nestjs/common';
 
 export function extractBearerTokenFromHeaders({ authorization }: IncomingHttpHeaders) {
   if (!authorization) {

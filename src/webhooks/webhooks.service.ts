@@ -2,12 +2,12 @@ import { Injectable, Logger, UnprocessableEntityException } from '@nestjs/common
 import { EmailService } from '../email/email.service.js';
 import { UsersService } from '../users/users.service.js';
 import {
-  LogtoWebhookEvent,
   type LogtoWebhookPayload,
   type UserCreatedWebhookPayload,
   type UserUpdatedWebhookPayload,
   type UserDeletedWebhookPayload,
 } from './_utils/types/logto-webhook.types.js';
+import { LogtoWebhookEventEnum } from './_utils/enum/logto-webhook-event-enum';
 
 @Injectable()
 export class WebhooksService {
@@ -23,15 +23,15 @@ export class WebhooksService {
 
     try {
       switch (payload.event) {
-        case LogtoWebhookEvent.USER_CREATED:
+        case LogtoWebhookEventEnum.USER_CREATED:
           await this.handleUserCreated(payload);
           break;
 
-        case LogtoWebhookEvent.USER_UPDATED:
+        case LogtoWebhookEventEnum.USER_UPDATED:
           await this.handleUserUpdated(payload);
           break;
 
-        case LogtoWebhookEvent.USER_DELETED:
+        case LogtoWebhookEventEnum.USER_DELETED:
           await this.handleUserDeleted(payload);
           break;
 
@@ -46,7 +46,7 @@ export class WebhooksService {
 
   private async handleUserCreated(payload: UserCreatedWebhookPayload) {
     const { data } = payload;
-    const username = data.username || data.name || 'Nouvel utilisateur';
+    const username = data.username ?? 'Nouvel utilisateur';
 
     await this.usersService.findOrCreateUser({ ...data, username });
 
@@ -60,19 +60,22 @@ export class WebhooksService {
 
   private async handleUserUpdated(payload: UserUpdatedWebhookPayload) {
     const { data } = payload;
-    const username = data.username || data.name || 'Utilisateur';
-    const email = data.primaryEmail || 'email-erreur-uto-@gmail.fr';
+
+    if (!data.primaryEmail || !data.username) {
+      this.logger.warn(`email or username not found webhook event update `);
+      return;
+    }
+
+    const username = data.username;
+    const email = data.primaryEmail;
 
     await this.usersService.updateUserByLogtoId(data.id, {
       email,
       username,
     });
 
-    if (data.primaryEmail) {
-      await this.emailService.sendUserProfileUpdated({
-        email: data.primaryEmail,
-        username,
-      });
+    if (email) {
+      await this.emailService.sendUserProfileUpdated({ email, username });
     }
   }
 
@@ -84,7 +87,7 @@ export class WebhooksService {
     if (data.primaryEmail) {
       await this.emailService.sendUserAccountDeleted({
         email: data.primaryEmail,
-        username: data.username || 'User',
+        username: data.username ?? 'Utilisateur',
       });
     }
   }

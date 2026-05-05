@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, QueryFilter } from 'mongoose';
+import { Model } from 'mongoose';
 import { User, UserDocument } from './users.schema';
-import { MongoId } from '../_utils/types/mongo-id.type';
 import { UserExceptionsTypes } from './_utils/errors/user-exceptions.types';
 import { LogtoUser } from '../logto/_utils/types/responses/responses.type';
 import { UpdateAccountDto } from './_utils/dtos/requests/update-user-dto';
+import { LogtoId } from '../logto/_utils/types/logto.types';
 
 @Injectable()
 export class UsersRepository {
@@ -17,30 +17,35 @@ export class UsersRepository {
   async createUser(logtoUser: LogtoUser) {
     const newUser = new this.model({
       logtoId: logtoUser.id,
-      username: logtoUser.username || logtoUser.name,
+      username: logtoUser.username ?? 'utilisateur',
       email: logtoUser.primaryEmail,
     });
+    if (!newUser) throw this.userException.ERROR_CREATE_USER_MONGO_DB;
+
     return newUser.save();
   }
 
-  async updateByLogtoId(logtoId: MongoId, updateData: UpdateAccountDto) {
-    return this.model.findOneAndUpdate({ logtoId }, { $set: updateData }, { new: true }).exec();
+  async updateByLogtoId(logtoId: LogtoId, updateData: UpdateAccountDto) {
+    const updatedUser = this.model.findOneAndUpdate({ logtoId }, { $set: updateData }, { new: true }).exec();
+    if (!updatedUser) throw this.userException.ERROR_CREATE_USER_MONGO_DB;
+
+    return;
   }
 
-  async deleteByLogtoId(logtoId: MongoId) {
+  async deleteByLogtoId(logtoId: LogtoId) {
     const result = await this.model.deleteOne({ logtoId }).exec();
     return result.deletedCount > 0;
   }
 
-  findOneByIdOrThrow(id: MongoId) {
-    return this.model.findOne({ userLogtoId: id.toString() }).orFail(this.userException.ERROR_NOT_FOUND_USER).exec();
+  findOneByIdOrThrow(userId: LogtoId) {
+    return this.model.findOne({ userLogtoId: userId }).orFail(this.userException.ERROR_NOT_FOUND_USER).exec();
   }
 
-  userWithLogtoIdExist(logtoId: MongoId) {
-    return this.model.findOne({ userLogtoId: logtoId.toString() });
+  userWithLogtoIdExist(logtoId: LogtoId) {
+    return this.model.findOne({ userLogtoId: logtoId });
   }
 
-  async findByLogtoId(logtoId: MongoId) {
-    return this.model.findOne({ logtoId }).exec();
+  async findByLogtoId(logtoId: LogtoId) {
+    return this.model.findOne({ userLogtoId: logtoId }).exec();
   }
 }

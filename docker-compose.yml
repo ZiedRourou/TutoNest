@@ -42,7 +42,7 @@ services:
       - logto_data:/data/db
 
   postgres:
-    image: postgres:17-alpine
+    image: postgres:${POSTGRES_TAG}
     container_name: postgres
     user: postgres
     environment:
@@ -57,7 +57,7 @@ services:
       - postgre_data:/var/lib/postgresql/data
 
   mongodb:
-    image: mongo:8
+    image: mongo:${MONGO_TAG}
     container_name: mongodb
     restart: always
     ports:
@@ -68,7 +68,7 @@ services:
     volumes:
       - mongodb_data:/data/db
   mailhog:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:${MAILHOG_TAG}
     container_name: mailhog
     restart: unless-stopped
     volumes:
