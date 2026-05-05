@@ -3,7 +3,6 @@ import { UsersRepository } from './users.repository';
 import { UserDocument } from './users.schema';
 import { AuthInfo } from '../logto/_utils/types/auth-info.types';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { NewUserRoleDto } from './_utils/dtos/requests/new-user-role.dto';
 import { LogtoService } from '../logto/logto.service';
 import { UserExceptionsTypes } from './_utils/errors/user-exceptions.types';
 
@@ -34,16 +33,5 @@ export class UsersService {
     if (!newUser) throw this.userException.ERROR_CREATE_USER_MONGO_DB;
 
     return newUser;
-  }
-
-  async updateUserRole(user: UserDocument, newRole: NewUserRoleDto) {
-    await Promise.all([
-      this.usersRepository.updateUserRole(user._id, newRole),
-      this.logtoService.updateUserRole(user.userLogtoId, newRole),
-    ]);
-  }
-
-  async deleteUser(user: UserDocument) {
-    await Promise.all([this.usersRepository.deleteUser(user._id), this.logtoService.deleteUser(user.userLogtoId)]);
   }
 }

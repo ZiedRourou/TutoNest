@@ -3,6 +3,5 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 @Injectable()
 export class LogtoExceptions {
   DEFAULT_LOGTO_ERROR = new InternalServerErrorException('Error during request to logto');
-  ERROR_UPDATE_USER_PASSWORD = new BadRequestException('Failed to update user password');
-  ERROR_DELETE_USER = new BadRequestException('Failed to delete user');
+  ERROR_FETCH_USER_INFORMATIONS = new BadRequestException('Failed to fetch user informations');
 }

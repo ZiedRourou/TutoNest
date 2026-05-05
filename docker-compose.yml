@@ -39,7 +39,6 @@ services:
     volumes:
       - logto_data:/data/db
 
-  #postgre for logto
   postgres:
     image: postgres:17-alpine
     container_name: postgres
@@ -55,7 +54,6 @@ services:
     volumes:
       - postgre_data:/var/lib/postgresql/data
 
-  #mongodb for nest
   mongodb:
     image: mongo:8
     container_name: mongodb
@@ -68,10 +66,22 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    restart: always
+    ports:
+      - 1025:1025
+      - 8025:8025
+    volumes:
+      - mailhog:/data/db
+
+
 volumes:
   mongodb_data:
   logto_data:
   postgre_data:
+  mailhog:
 
 networks:
   app_network:

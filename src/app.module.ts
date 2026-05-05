@@ -8,6 +8,10 @@ import { UsersModule } from './users/users.module';
 import { EnvironmentVariables, MongoConfig, validateEnv } from './_utils/config/env.config';
 import { LogtoModule } from './logto/logto.module';
 import { CommentModule } from './comment/comment.module';
+import { EmailModule } from './email/email.module';
+import { EmailService } from './email/email.service';
+import { UserExceptionsTypes } from './users/_utils/errors/user-exceptions.types';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -22,7 +26,11 @@ import { CommentModule } from './comment/comment.module';
     UsersModule,
     CommentModule,
     LogtoModule,
+    EmailModule,
+    WebhooksModule,
   ],
   controllers: [UsersController],
+  providers: [EmailService, UserExceptionsTypes],
+  exports: [EmailService],
 })
 export class AppModule {}

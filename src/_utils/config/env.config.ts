@@ -1,7 +1,7 @@
 import { exit } from 'process';
-import { IsNumber, IsString, ValidateNested, validateSync } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested, validateSync } from 'class-validator';
 import { plainToInstance, Type } from 'class-transformer';
-import { Logger } from '@nestjs/common';
+import { Logger, Optional } from '@nestjs/common';
 
 export class LogtoConfig {
   @IsString()
@@ -42,18 +42,42 @@ export class MongoConfig {
   @IsString()
   MONGO_PASSWORD: string;
 }
+//
+// export class PostgresConfig {
+//   @IsString()
+//   POSTGRES_USER: string;
+//
+//   @IsString()
+//   POSTGRES_PASSWORD: string;
+//
+//   @IsString()
+//   POSTGRES_DB: string;
+// }
 
-export class PostgresConfig {
+export class SMTPConfig {
   @IsString()
-  POSTGRES_USER: string;
+  SMTP_HOST: string;
+
+  @IsNumber()
+  SMTP_PORT: number;
 
   @IsString()
-  POSTGRES_PASSWORD: string;
+  SMTP_USER: string;
 
   @IsString()
-  POSTGRES_DB: string;
+  SMTP_PASSWORD: string;
+
+  @IsString()
+  SMTP_SENDER: string;
+
+  @IsString()
+  @IsOptional()
+  SMTP_SERVICE?: string;
+
+  @IsString()
+  @IsOptional()
+  SMTP_CONTACT_RECIPIENT?: string;
 }
-
 export class EnvironmentVariables {
   @IsNumber()
   NESTJS_PORT: number;
@@ -67,8 +91,8 @@ export class EnvironmentVariables {
   LOGTO: LogtoConfig;
 
   @ValidateNested()
-  @Type(() => PostgresConfig)
-  POSTGRES: PostgresConfig;
+  @Type(() => SMTPConfig)
+  SMTP: SMTPConfig;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
@@ -90,10 +114,15 @@ export function validateEnv(config: Record<string, unknown>) {
       LOGTO_ENDPOINT: config.LOGTO_ENDPOINT,
       LOGTO_ADMIN_ENDPOINT: config.LOGTO_ADMIN_ENDPOINT,
     },
-    POSTGRES: {
-      POSTGRES_USER: config.POSTGRES_USER,
-      POSTGRES_PASSWORD: config.POSTGRES_PASSWORD,
-      POSTGRES_DB: config.POSTGRES_DB,
+
+    SMTP: {
+      SMTP_HOST: config.SMTP_HOST,
+      SMTP_PORT: config.SMTP_PORT,
+      SMTP_USER: config.SMTP_USER,
+      SMTP_PASSWORD: config.SMTP_PASSWORD,
+      SMTP_SENDER: config.SMTP_SENDER,
+      SMTP_SERVICE: config.SMTP_SERVICE,
+      SMTP_CONTACT_RECIPIENT: config.SMTP_CONTACT_RECIPIENT,
     },
   };
 

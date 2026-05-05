@@ -7,12 +7,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LOGTO_CLIENT_TOKEN, LOGTO_TENANT_ID } from 'src/_utils/constants';
+import { LOGTO_CLIENT_TOKEN } from 'src/_utils/constants';
 import type { LogtoClient } from 'src/logto/_utils/types/logto.types';
 import { LogtoResponseType } from 'src/logto/_utils/types/responses/responses.type';
+
 import { LogtoExceptions } from './_utils/errors/logto-exceptions.types';
-import { NewUserRoleDto } from '../users/_utils/dtos/requests/new-user-role.dto';
-import { MongoId } from '../_utils/types/mongo-id.type';
 
 @Injectable()
 export class LogtoRequests {
@@ -21,22 +20,21 @@ export class LogtoRequests {
     private readonly exceptions: LogtoExceptions,
   ) {}
 
-  updateUserRole = (userId: MongoId<string>, dto: NewUserRoleDto) =>
+  /**
+   * GET /api/users/{userId}
+   * Fetch user information by user ID.
+   * @link https://openapi.logto.io/operation/operation-getuser
+   * @param userId
+   * @returns User information
+   */
+  fetchUserInformations = (userId: string) =>
     this.handleResponse(
-      // pas fini faut sup le role de logto avant d'attribuer le nouv role
-      this.logtoClient.POST(`/api/users/{userId}/roles`, {
-        params: { path: { userId: userId.toString() } },
-        body: { roleIds: [dto.role] },
+      this.logtoClient.GET(`/api/users/{userId}`, {
+        params: {
+          path: { userId: userId },
+        },
       }),
-      this.exceptions.ERROR_UPDATE_USER_PASSWORD,
-    );
-
-  deleteUser = (userId: MongoId<string>) =>
-    this.handleResponse(
-      this.logtoClient.DELETE(`/api/users/{userId}`, {
-        params: { path: { userId: userId.toString() } },
-      }),
-      this.exceptions.ERROR_DELETE_USER,
+      this.exceptions.ERROR_FETCH_USER_INFORMATIONS,
     );
 
   private handleResponse = <T>(
@@ -66,7 +64,23 @@ export class LogtoRequests {
     if (res.response?.status) {
       const status = res.response.status;
       const errorMessage = error?.message || 'Request failed';
-      this.throwError(status, errorMessage);
+
+      switch (status) {
+        case 400:
+          throw new BadRequestException(errorMessage);
+        case 401:
+          throw new UnauthorizedException(errorMessage);
+        case 403:
+          throw new ForbiddenException(errorMessage);
+        case 404:
+          throw new NotFoundException(errorMessage);
+        case 409:
+          throw new BadRequestException(errorMessage);
+        default:
+          if (status >= 500) {
+            throw new InternalServerErrorException(errorMessage);
+          }
+      }
     }
 
     if (!res.data) {
@@ -74,23 +88,4 @@ export class LogtoRequests {
     }
     return res.data;
   };
-
-  private throwError(status: number, errorMessage: string) {
-    switch (status) {
-      case 400:
-        throw new BadRequestException(errorMessage);
-      case 401:
-        throw new UnauthorizedException(errorMessage);
-      case 403:
-        throw new ForbiddenException(errorMessage);
-      case 404:
-        throw new NotFoundException(errorMessage);
-      case 409:
-        throw new BadRequestException(errorMessage);
-      default:
-        if (status >= 500) {
-          throw new InternalServerErrorException(errorMessage);
-        }
-    }
-  }
 }
