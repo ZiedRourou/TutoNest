@@ -5,7 +5,7 @@ import type { MongoId } from '../../../../_utils/types/mongo-id.type';
 
 export class GetUserDto {
   @ApiProperty()
-  id: MongoId<string>;
+  id: MongoId;
 
   @ApiProperty()
   username: string;

@@ -12,6 +12,6 @@ export class LogtoMapper {
     scopes: (payload.scope as string)?.split(' ') ?? [],
     role: payload.role,
     username: payload.username,
-    user,
+    ...user,
   });
 }

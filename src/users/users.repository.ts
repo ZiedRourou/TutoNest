@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, QueryFilter } from 'mongoose';
+import { Model } from 'mongoose';
 import { User, UserDocument } from './users.schema';
-import { AuthInfo } from '../logto/_utils/types/auth-info.types';
-import { MongoId } from '../_utils/types/mongo-id.type';
-import { NewUserRoleDto } from './_utils/dtos/requests/new-user-role.dto';
 import { UserExceptionsTypes } from './_utils/errors/user-exceptions.types';
+import { LogtoUser } from '../logto/_utils/types/responses/responses.type';
+import { UpdateAccountDto } from './_utils/dtos/requests/update-user-dto';
+import { LogtoId } from '../logto/_utils/types/logto.types';
 
 @Injectable()
 export class UsersRepository {
@@ -14,29 +14,38 @@ export class UsersRepository {
     private readonly userException: UserExceptionsTypes,
   ) {}
 
-  findOneByIdOrThrow(id: string) {
-    return this.model.findOne({ userLogtoId: id }).orFail(this.userException.ERROR_NOT_FOUND_USER).exec();
-  }
-
-  userWithLogtoIdExist(userLogtoId: string): Promise<UserDocument | null> {
-    return this.model.findOne({ userLogtoId });
-  }
-
-  createUser(createUserDto: AuthInfo) {
-    return this.model.create({
-      username: createUserDto.username,
-      userLogtoId: createUserDto.userLogtoId,
-      role: createUserDto.role,
+  async createUser(logtoUser: LogtoUser) {
+    const newUser = new this.model({
+      logtoId: logtoUser.id,
+      username: logtoUser.username ?? 'utilisateur',
+      email: logtoUser.primaryEmail,
     });
+    if (!newUser) throw this.userException.ERROR_CREATE_USER_MONGO_DB;
+
+    return newUser.save();
   }
 
-  updateUserRole(userId: MongoId<Types.ObjectId>, newRole: NewUserRoleDto) {
-    return this.model
-      .findByIdAndUpdate(userId, { role: newRole.role })
-      .orFail(this.userException.ERROR_UPDATE_USER_ROLE_MONGO_DB)
-      .exec();
+  async updateByLogtoId(logtoId: LogtoId, updateData: UpdateAccountDto) {
+    const updatedUser = this.model.findOneAndUpdate({ logtoId }, { $set: updateData }, { new: true }).exec();
+    if (!updatedUser) throw this.userException.ERROR_CREATE_USER_MONGO_DB;
+
+    return;
   }
-  deleteUser(userId: MongoId<Types.ObjectId>) {
-    return this.model.findByIdAndDelete(userId).orFail(this.userException.ERROR_DELETE_USER_MONGO_DB).exec();
+
+  async deleteByLogtoId(logtoId: LogtoId) {
+    const result = await this.model.deleteOne({ logtoId }).exec();
+    return result.deletedCount > 0;
+  }
+
+  findOneByIdOrThrow(userId: LogtoId) {
+    return this.model.findOne({ userLogtoId: userId }).orFail(this.userException.ERROR_NOT_FOUND_USER).exec();
+  }
+
+  userWithLogtoIdExist(logtoId: LogtoId) {
+    return this.model.findOne({ userLogtoId: logtoId });
+  }
+
+  async findByLogtoId(logtoId: LogtoId) {
+    return this.model.findOne({ userLogtoId: logtoId }).exec();
   }
 }

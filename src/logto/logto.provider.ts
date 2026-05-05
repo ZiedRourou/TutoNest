@@ -1,4 +1,3 @@
-import { createManagementApi } from '@logto/api/management';
 import { Logger, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createRemoteJWKSet } from 'jose';
@@ -11,9 +10,10 @@ import {
   LOGTO_TENANT_ID,
   LOGTO_URIS_TOKEN,
 } from 'src/_utils/constants';
-import { JwksUris } from 'src/logto/_utils/types/jwks-set.types';
 import { LogtoClient, LogtoClientCredentials } from 'src/logto/_utils/types/logto.types';
 import { OpenIdConfig } from './_utils/types/openid-config.types';
+import { createManagementApi } from '@logto/api/management';
+import { JwksUris } from './_utils/types/jwks-set.types';
 
 export const logtoProviders: Provider[] = [
   {

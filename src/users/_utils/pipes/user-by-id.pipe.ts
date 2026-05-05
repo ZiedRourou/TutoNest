@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+import { Injectable, PipeTransform } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { UsersRepository } from '../../users.repository';
 import { UserDocument } from '../../users.schema';

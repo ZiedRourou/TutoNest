@@ -14,34 +14,42 @@ export class ArticleRepository {
     private readonly articleException: ArticleExceptionsTypes,
   ) {}
 
-  createArticle(createArticleDto: CreateArticleDto, userId: MongoId<UserDocument>) {
-    return this.articleModel.create({ ...createArticleDto, author: userId });
+  createArticle(createArticleDto: CreateArticleDto, userId: MongoId) {
+    return this.articleModel.create({ ...createArticleDto, author: new Types.ObjectId(userId) });
   }
 
-  updateOrFailArticle(articleId: MongoId<Types.ObjectId>, updateArticleDto: UpdateArticleDto) {
+  updateOrFailArticle(articleId: MongoId, updateArticleDto: UpdateArticleDto) {
     return this.articleModel
       .findByIdAndUpdate(articleId, updateArticleDto, { new: true })
       .orFail(this.articleException.ERROR_UPDATE_ARTICLE)
       .exec();
   }
-  deleteOrFailArticle(articleId: MongoId<Types.ObjectId>) {
+  deleteOrFailArticle(articleId: MongoId) {
     return this.articleModel.findByIdAndDelete(articleId).orFail(this.articleException.ERROR_DELETE_ARTICLE).exec();
   }
 
-  isArticleLikedByUser(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
-    return this.articleModel.exists({ _id: articleId, likes: userId });
-  }
-
-  likeArticleByUser(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
-    return this.articleModel
-      .findByIdAndUpdate(articleId, { $addToSet: { likes: userId } })
-      .orFail(this.articleException.ERROR_LIKE_ARTICLE)
+  async getArticleWithStats(articleId: MongoId) {
+    const result = this.articleModel
+      .aggregate()
+      .match({ _id: new Types.ObjectId(articleId) })
+      .lookup({ from: 'comments', localField: '_id', foreignField: 'article', as: 'commentsData' })
+      .addFields({ commentsCount: { $size: '$commentsData' } })
+      .project({ commentsData: 0 })
       .exec();
+
+    return result[0] ?? null;
   }
 
-  dislikeArticleByUser(articleId: MongoId<Types.ObjectId>, userId: MongoId<Types.ObjectId>) {
+  async isUserAlreadyLikeArticle(articleId: MongoId, userId: MongoId): Promise<boolean> {
+    const result = await this.articleModel.exists({ _id: articleId, likes: userId });
+    return !!result;
+  }
+
+  toggleLikeArticle(articleId: MongoId, userId: MongoId, like: boolean) {
+    const update = like ? { $addToSet: { likes: userId } } : { $pull: { likes: userId } };
+
     return this.articleModel
-      .findByIdAndUpdate(articleId, { $pull: { likes: userId } })
+      .findByIdAndUpdate(articleId, update)
       .orFail(this.articleException.ERROR_LIKE_ARTICLE)
       .exec();
   }
@@ -50,7 +58,7 @@ export class ArticleRepository {
     return this.articleModel.find();
   }
 
-  findOneByIdOrFail(id: MongoId<string>) {
+  findOneByIdOrFail(id: MongoId) {
     return this.articleModel
       .findById(id)
       .populate(User.name)

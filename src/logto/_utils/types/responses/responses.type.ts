@@ -5,3 +5,5 @@ export type LogtoResponseType<T> = {
   error?: unknown;
   response?: Response;
 };
+
+export type LogtoUser = NonNullable<Awaited<ReturnType<LogtoRequests['fetchUserInformations']>>>;
