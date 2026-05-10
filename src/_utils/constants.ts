@@ -13,3 +13,4 @@ export const ROLES_KEY = 'ROLES_KEY';
 export const ALLOWED_ROLES = [UserRoleEnum.AUTHOR, UserRoleEnum.LECTOR] as const;
 
 export const ARTICLE_NAME_ERROR = 'ARTICLE';
+export const RUSTFS_CLIENT_TOKEN = 'RustfsClient';

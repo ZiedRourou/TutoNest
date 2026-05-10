@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { UserRoleEnum } from './_utils/enum/user-role.enum';
 import type { UserRoleEnumValueType } from './_utils/types/user-role.type';
+import { RustfsFile, RustfsFileSchema } from '../rustfs/rustfs.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -24,6 +25,16 @@ export class User {
     default: null,
   })
   deletedAt: Date | null;
+
+  @Prop({
+    type: String,
+    required: true,
+    unique: true,
+  })
+  email: string;
+
+  @Prop({ required: false, type: RustfsFileSchema, default: null })
+  avatar: RustfsFile | null;
 
   createdAt: Date;
 

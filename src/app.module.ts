@@ -8,7 +8,8 @@ import { CommentModule } from './comment/comment.module';
 import { LogtoModule } from './logto/logto.module';
 import { EmailModule } from './email/email.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
-import { UsersController } from './users/users.controller';
+import { RustfsModule } from './rustfs/rustfs.module';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
@@ -19,12 +20,14 @@ import { UsersController } from './users/users.controller';
         uri: configService.get<MongoConfig>('MONGO').MONGODB_URL,
       }),
     }),
+    NestjsFormDataModule.config({ isGlobal: true, storage: MemoryStoredFile }),
     ArticleModule,
     UsersModule,
     CommentModule,
     LogtoModule,
     EmailModule,
     WebhooksModule,
+    RustfsModule,
   ],
 })
 export class AppModule {}

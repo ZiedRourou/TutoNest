@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UsersService } from './users.service';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import UsersService from './users.service';
 import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { UserByIdPipe } from './_utils/pipes/user-by-id.pipe';
 import { UserRoleEnum } from './_utils/enum/user-role.enum';
@@ -8,8 +8,9 @@ import { ConnectedUser } from './_utils/decorators/connecter-user.decorator';
 import type { UserDocument } from './users.schema';
 import * as responsesType from '../logto/_utils/types/responses/responses.type';
 import type { LogtoUser } from '../logto/_utils/types/responses/responses.type';
-import { UpdateAccountDto } from './_utils/dtos/requests/update-user-dto';
+import { UpdateUserDto } from './_utils/dtos/requests/update-user-dto';
 import { UpdateUserPasswordDto } from './_utils/dtos/requests/update-user-password.dto';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @ApiTags('Users')
 @Controller('users')
@@ -31,11 +32,13 @@ export class UsersController {
     return this.usersService.getUser(user);
   }
 
-  @Protect()
   @Patch('me')
+  @ApiBearerAuth('access-token')
+  @Protect()
+  @ApiConsumes('multipart/form-data')
+  @FormDataRequest()
   @HttpCode(HttpStatus.NO_CONTENT)
-  updateAccount(@ConnectedUser() user: LogtoUser, @Body() dto: UpdateAccountDto) {
-    //pour le role je sais toujours pas qui faire le front doit pas plutot envoyer l'id du role directement ?
+  updateAccount(@ConnectedUser() user: UserDocument, @Body() dto: UpdateUserDto) {
     return this.usersService.updateAccount(user, dto);
   }
 

@@ -4,6 +4,7 @@ import { plainToInstance, Type } from 'class-transformer';
 import { Logger } from '@nestjs/common';
 import { EnvironmentEnum } from '../enums/environnement-enum';
 import type { EnvironnementEnumValueType } from '../types/environnement-type';
+import { Optional } from 'class-validator-extended';
 
 export class LogtoConfig {
   @IsString()
@@ -82,6 +83,23 @@ export class SmtpConfig {
   MAILHOG_TAG: string;
 }
 
+export class RustfsConfig {
+  @IsString()
+  RUSTFS_ENDPOINT: string;
+
+  @IsNumber()
+  RUSTFS_PORT: number;
+
+  @IsString()
+  RUSTFS_ACCESS_KEY: string;
+
+  @IsString()
+  RUSTFS_SECRET_KEY: string;
+
+  @IsString()
+  RUSTFS_BUCKET_NAME: string;
+}
+
 export class EnvironmentVariables {
   @IsNumber()
   NESTJS_PORT: number;
@@ -104,6 +122,10 @@ export class EnvironmentVariables {
 
   @IsEnum(EnvironmentEnum)
   NODE_ENV: EnvironnementEnumValueType;
+
+  @ValidateNested()
+  @Type(() => RustfsConfig)
+  RUSTFS: RustfsConfig;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
@@ -141,6 +163,13 @@ export function validateEnv(config: Record<string, unknown>) {
       MAILHOG_TAG: config.MAILHOG_TAG,
     },
     NODE_ENV: config.NODE_ENV,
+    RUSTFS: {
+      RUSTFS_ENDPOINT: config.RUSTFS_ENDPOINT,
+      RUSTFS_PORT: config.RUSTFS_PORT,
+      RUSTFS_ACCESS_KEY: config.RUSTFS_ACCESS_KEY,
+      RUSTFS_SECRET_KEY: config.RUSTFS_SECRET_KEY,
+      RUSTFS_BUCKET_NAME: config.RUSTFS_BUCKET_NAME,
+    },
   };
 
   const validatedConfig = plainToInstance(EnvironmentVariables, structuredConfig, {

@@ -21,7 +21,7 @@ export class EmailService {
     return this.sendEmail(this.emailMapper.toUserProfileUpdatedEmail(dto));
   }
 
-  async sendUserAccountDeleted(dto: { email: string; username: string }) {
+  async sendUserAccountDeleted(dto: UserLogtoEmailTypes) {
     return this.sendEmail(this.emailMapper.toUserAccountDeletedEmail(dto));
   }
 

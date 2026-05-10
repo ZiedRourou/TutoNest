@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
 import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
-import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { ConnectedUser } from '../users/_utils/decorators/connecter-user.decorator';
 import { ArticleByIdPipe } from './_utils/pipes/article-by-id-pipe';
@@ -15,8 +15,9 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @Get()
-  @Protect()
   @ApiOperation({ summary: 'Get all articles' })
+  @ApiBearerAuth('access-token')
+  @Protect()
   getAllArticles() {
     return this.articleService.getAllArticles();
   }
@@ -40,7 +41,6 @@ export class ArticleController {
     description: 'ObjectId Of article',
   })
   getArticleByIdWithStat(@Param('id', ArticleByIdPipe) article: ArticleDocument) {
-    //pas finis je regarde encore l'aggregation
     return this.articleService.getArticleByIdWithStat(article);
   }
 
