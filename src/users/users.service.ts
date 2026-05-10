@@ -1,18 +1,16 @@
 import { UsersMapper } from './users.mapper';
 import { UsersRepository } from './users.repository';
 import { UserDocument } from './users.schema';
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { LogtoService } from '../logto/logto.service';
 import { UserExceptionsTypes } from './_utils/errors/user-exceptions.types';
 import { LogtoUser } from '../logto/_utils/types/responses/responses.type';
 import { UpdateUserDto } from './_utils/dtos/requests/update-user-dto';
 import { LogtoRequests } from '../logto/logto.requests';
-import { MongoId } from '../_utils/types/mongo-id.type';
 import { UpdateUserPasswordDto } from './_utils/dtos/requests/update-user-password.dto';
 import { LogtoId } from '../logto/_utils/types/logto.types';
 import { RustfsService } from '../rustfs/rustfs.service';
 import { RustfsMapper } from '../rustfs/rustfs.mapper';
-import { RustfsFile } from '../rustfs/rustfs.schema';
 
 @Injectable()
 class UsersService {

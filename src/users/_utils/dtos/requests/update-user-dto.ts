@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsNotIn, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Optional } from 'class-validator-extended';
 import { HasMimeType, IsFile, MaxFileSize, MemoryStoredFile } from 'nestjs-form-data';
 import { toMB } from '../../../../_utils/file-size.helpers';

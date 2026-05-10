@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString, IsUrl, Length, MaxLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ArticleCategoryEnum } from '../../enum/article-category.enum';
 import type { ArticleCategoryEnumValueType } from '../../types/article-category.type';

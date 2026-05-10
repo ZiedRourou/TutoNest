@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EmailService } from '../email/email.service.js';
 import UsersService from '../users/users.service.js';
 import {
@@ -8,7 +8,6 @@ import {
   type UserDeletedWebhookPayload,
 } from './_utils/types/logto-webhook.types.js';
 import { LogtoWebhookEventEnum } from './_utils/enum/logto-webhook-event-enum';
-import { LogtoUser } from '../logto/_utils/types/responses/responses.type';
 
 @Injectable()
 export class WebhooksService {

@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
-import { type CanActivate, type ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { EnvironmentVariables } from '../../../_utils/config/env.config';
 import { LogtoPayload } from '../../../logto/_utils/schemas/logto-payload.types';
 import { LogtoExceptions } from '../../../logto/_utils/errors/logto-exceptions.types';

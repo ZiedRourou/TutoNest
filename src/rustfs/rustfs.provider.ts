@@ -1,5 +1,5 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { Logger, Provider } from '@nestjs/common';
+import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables, RustfsConfig } from '../_utils/config/env.config';
 import { RUSTFS_CLIENT_TOKEN } from '../_utils/constants';

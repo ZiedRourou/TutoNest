@@ -4,7 +4,6 @@ import { plainToInstance, Type } from 'class-transformer';
 import { Logger } from '@nestjs/common';
 import { EnvironmentEnum } from '../enums/environnement-enum';
 import type { EnvironnementEnumValueType } from '../types/environnement-type';
-import { Optional } from 'class-validator-extended';
 
 export class LogtoConfig {
   @IsString()

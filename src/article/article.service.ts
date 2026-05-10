@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { ArticleRepository } from './article.repository';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
@@ -8,8 +8,6 @@ import { ArticlesMapper } from './articles.mapper';
 import { ArticleDocument } from './_utils/schemas/article.schema';
 import { MongoId } from '../_utils/types/mongo-id.type';
 import { assertIsAuthor } from '../_utils/functions/is-author-function';
-import { ARTICLE_NAME_ERROR } from '../_utils/constants';
-import { Types } from 'mongoose';
 import { DocumentEnum } from 'src/_utils/enums/document_category.enum';
 import { RustfsService } from '../rustfs/rustfs.service';
 import { RustfsMapper } from '../rustfs/rustfs.mapper';

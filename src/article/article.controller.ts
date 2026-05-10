@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
 import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
