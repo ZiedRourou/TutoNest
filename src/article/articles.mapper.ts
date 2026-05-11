@@ -12,6 +12,7 @@ export class ArticlesMapper {
     title: article.title,
     content: article.content,
     category: article.category,
+    image: article.image,
   });
 
   toGetArticleWithStatsDto = (article: ArticleWithStatsRaw): GetArticleWithStatsDto => {

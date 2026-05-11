@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ArticleDocument } from './_utils/schemas/article.schema';
 import { Model, Types } from 'mongoose';
-import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
-import { UpdateArticleDto } from './_utils/dtos/requests/update-article.dto';
 import { MongoId } from '../_utils/types/mongo-id.type';
-import { User, UserDocument } from '../users/users.schema';
+import { User } from '../users/users.schema';
 import { ArticleExceptionsTypes } from './_utils/errors/article-exceptions.types';
+import { CreateArticleDataType } from './_utils/types/create-article-data.type';
+import { UpdateArticleDataType } from './_utils/types/update-article-data.type';
 @Injectable()
 export class ArticleRepository {
   constructor(
@@ -14,11 +14,11 @@ export class ArticleRepository {
     private readonly articleException: ArticleExceptionsTypes,
   ) {}
 
-  createArticle(createArticleDto: CreateArticleDto, userId: MongoId) {
-    return this.articleModel.create({ ...createArticleDto, author: new Types.ObjectId(userId) });
+  createArticle(createArticleData: CreateArticleDataType, userId: MongoId) {
+    return this.articleModel.create({ ...createArticleData, author: new Types.ObjectId(userId) });
   }
 
-  updateOrFailArticle(articleId: MongoId, updateArticleDto: UpdateArticleDto) {
+  updateOrFailArticle(articleId: MongoId, updateArticleDto: UpdateArticleDataType) {
     return this.articleModel
       .findByIdAndUpdate(articleId, updateArticleDto, { new: true })
       .orFail(this.articleException.ERROR_UPDATE_ARTICLE)

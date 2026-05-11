@@ -7,9 +7,10 @@ import { ArticleRepository } from './article.repository';
 import { ArticlesMapper } from './articles.mapper';
 import { UsersModule } from '../users/users.module';
 import { ArticleExceptionsTypes } from './_utils/errors/article-exceptions.types';
+import { RustfsModule } from '../rustfs/rustfs.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Article', schema: ArticleSchema }]), UsersModule],
+  imports: [MongooseModule.forFeature([{ name: 'Article', schema: ArticleSchema }]), UsersModule, RustfsModule],
   controllers: [ArticleController],
   exports: [ArticleService, ArticleRepository],
   providers: [ArticleService, ArticleRepository, ArticlesMapper, ArticleExceptionsTypes],

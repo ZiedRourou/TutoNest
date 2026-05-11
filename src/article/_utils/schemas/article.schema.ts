@@ -3,6 +3,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { ArticleCategoryEnum } from '../enum/article-category.enum';
 import { User, type UserDocument } from '../../../users/users.schema';
 import type { ArticleCategoryEnumValueType } from '../types/article-category.type';
+import { RustfsFile, RustfsFileSchema } from '../../../rustfs/rustfs.schema';
 
 export type ArticleDocument = HydratedDocument<Article>;
 
@@ -27,6 +28,9 @@ export class Article {
     default: ArticleCategoryEnum.BUSINESS,
   })
   category: ArticleCategoryEnumValueType;
+
+  @Prop({ required: false, type: RustfsFileSchema, default: null })
+  image: RustfsFile | null;
 
   createdAt: Date;
 

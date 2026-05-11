@@ -7,6 +7,7 @@ import { EnvironmentVariables } from '../_utils/config/env.config';
 import { EmailService } from './email.service';
 import { EmailMapper } from './email.mapper';
 import { EnvironmentEnum } from '../_utils/enums/environnement-enum';
+import { EmailExceptionsTypes } from './_utils/errors/email-exceptions.types';
 
 @Module({
   imports: [
@@ -18,9 +19,9 @@ import { EnvironmentEnum } from '../_utils/enums/environnement-enum';
           transport: {
             host: configService.get('SMTP').SMTP_HOST,
             port: configService.get('SMTP').SMTP_PORT,
-            secure: configService.get('NODE_ENV') === EnvironmentEnum.Production,
+            secure: configService.get('NODE_ENV') === EnvironmentEnum.PRODUCTION,
             auth:
-              configService.get('NODE_ENV') === EnvironmentEnum.Production
+              configService.get('NODE_ENV') === EnvironmentEnum.PRODUCTION
                 ? {
                     user: configService.get('SMTP').SMTP_USER,
                     pass: configService.get('SMTP').SMTP_PASS,
@@ -38,7 +39,7 @@ import { EnvironmentEnum } from '../_utils/enums/environnement-enum';
       },
     }),
   ],
-  providers: [EmailService, EmailMapper],
+  providers: [EmailService, EmailMapper, EmailExceptionsTypes],
   exports: [EmailService, EmailMapper],
 })
 export class EmailModule {}

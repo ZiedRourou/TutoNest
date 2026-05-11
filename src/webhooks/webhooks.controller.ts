@@ -13,7 +13,7 @@ export class WebhooksController {
   @Post('logto')
   @UseGuards(LogtoWebhookSignatureGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  handleLogtoWebhook(@Body() payload: logtoWebhookTypes.LogtoWebhookPayload): Promise<void> {
+  handleLogtoWebhook(@Body() payload: logtoWebhookTypes.LogtoWebhookPayload) {
     return this.webhooksService.handleLogtoWebhookEvent(payload);
   }
 }

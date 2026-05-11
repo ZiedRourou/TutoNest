@@ -12,8 +12,6 @@ import type { LogtoClient } from 'src/logto/_utils/types/logto.types';
 import { LogtoResponseType } from 'src/logto/_utils/types/responses/responses.type';
 import { LogtoExceptions } from './_utils/errors/logto-exceptions.types';
 import { MongoId } from '../_utils/types/mongo-id.type';
-import { UpdateAccountDto } from '../users/_utils/dtos/requests/update-user-dto';
-import { Types } from 'mongoose';
 
 @Injectable()
 export class LogtoRequests {
@@ -22,31 +20,17 @@ export class LogtoRequests {
     private readonly exceptions: LogtoExceptions,
   ) {}
 
-  updateUserProfile = (userId: MongoId, dto: UpdateAccountDto) =>
-    this.handleResponse(
-      this.logtoClient.PATCH(`/api/users/{userId}/profile`, {
-        params: {
-          path: { userId: userId.toString() },
-        },
-        body: {
-          profile: {
-            preferredUsername: dto.username!,
-          },
-        },
-      }),
-      this.exceptions.ERROR_UPDATE_USER_PASSWORD,
-    );
-
-  deleteUser = (userId: MongoId) =>
-    this.handleResponse(
+  deleteUser(userId: MongoId) {
+    return this.handleResponse(
       this.logtoClient.DELETE(`/api/users/{userId}`, {
         params: { path: { userId: userId.toString() } },
       }),
       this.exceptions.ERROR_DELETE_USER,
     );
+  }
 
-  fetchUserInformations = (userId: MongoId) =>
-    this.handleResponse(
+  fetchUserInformations(userId: MongoId) {
+    return this.handleResponse(
       this.logtoClient.GET(`/api/users/{userId}`, {
         params: {
           path: { userId: userId.toString() },
@@ -54,9 +38,10 @@ export class LogtoRequests {
       }),
       this.exceptions.DEFAULT_LOGTO_ERROR,
     );
+  }
 
-  verifyUserPassword = (userId: MongoId, password: string) =>
-    this.handleResponse(
+  verifyUserPassword(userId: MongoId, password: string) {
+    return this.handleResponse(
       this.logtoClient.POST(`/api/users/{userId}/password/verify`, {
         params: {
           path: { userId: userId.toString() },
@@ -65,11 +50,12 @@ export class LogtoRequests {
           password,
         },
       }),
-      this.exceptions.DEFAULT_LOGTO_ERROR,
+      this.exceptions.ERROR_LOGTO_PASSWORD_VERIFY,
     );
+  }
 
-  updateUserPassword = (userId: MongoId, password: string) =>
-    this.handleResponse(
+  updateUserPassword(userId: MongoId, password: string) {
+    return this.handleResponse(
       this.logtoClient.PATCH(`/api/users/{userId}/password`, {
         params: {
           path: { userId: userId.toString() },
@@ -80,6 +66,35 @@ export class LogtoRequests {
       }),
       this.exceptions.ERROR_UPDATE_USER_PASSWORD,
     );
+  }
+
+  updateUserProfilePicture(userId: string, profilePictureUrl: string) {
+    return this.handleResponse(
+      this.logtoClient.PATCH('/api/users/{userId}', {
+        params: {
+          path: { userId },
+        },
+        body: {
+          avatar: profilePictureUrl,
+        },
+      }),
+      this.exceptions.ERROR_UPDATE_USER_AVATAR,
+    );
+  }
+
+  getRoles() {
+    return this.handleResponse(this.logtoClient.GET(`/api/roles`, {}), this.exceptions.DEFAULT_LOGTO_ERROR);
+  }
+
+  updateRoleToUser(userId: MongoId, roleIds: string[]) {
+    return this.handleResponse(
+      this.logtoClient.PUT(`/api/users/{userId}/roles`, {
+        params: { path: { userId: userId.toString() } },
+        body: { roleIds },
+      }),
+      this.exceptions.ERROR_UPDATE_USER_ROLE,
+    );
+  }
 
   private handleResponse = <T>(
     promise: Promise<LogtoResponseType<T>>,

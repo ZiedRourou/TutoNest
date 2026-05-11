@@ -1,63 +1,53 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { jwtVerify } from 'jose';
-import { LOGTO_JWKS_TOKEN, LOGTO_URIS_TOKEN } from 'src/_utils/constants';
-import { AuthInfo } from 'src/logto/_utils/types/auth-info.types';
-
+import { Injectable } from '@nestjs/common';
 import { LogtoRequests } from './logto.requests';
-import { decodeLogtoPayload, LogtoPayload } from './_utils/schemas/logto-payload.types';
-import { LogtoMapper } from './logto.mapper';
-import type { Jwks, JwksUris } from './_utils/types/jwks-set.types';
-import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/users.schema';
 import { LogtoUser } from './_utils/types/responses/responses.type';
-import { UpdateAccountDto } from '../users/_utils/dtos/requests/update-user-dto';
+import { UpdateUserDto } from '../users/_utils/dtos/requests/update-user-dto';
 import { UpdateUserPasswordDto } from '../users/_utils/dtos/requests/update-user-password.dto';
+import { LogtoExceptions } from './_utils/errors/logto-exceptions.types';
+import { LogtoId } from './_utils/types/logto.types';
 
 @Injectable()
 export class LogtoService {
   constructor(
     private readonly logtoRequests: LogtoRequests,
-    private readonly logtoMapper: LogtoMapper,
-    @Inject(LOGTO_JWKS_TOKEN) private readonly jwks: Jwks,
-    @Inject(LOGTO_URIS_TOKEN) private readonly logtoUris: JwksUris,
-    private readonly userService: UsersService,
+    private readonly logtoException: LogtoExceptions,
   ) {}
 
-  async validateJwt(token: string): Promise<LogtoPayload> {
-    const { payload } = await jwtVerify(token, this.jwks, {
-      issuer: this.logtoUris.issuerUri,
-    });
-
-    return decodeLogtoPayload(payload);
-  }
-
-  async createAuthInfo(payload: LogtoPayload): Promise<AuthInfo> {
-    const sub = payload.sub;
-    if (!sub) throw new BadRequestException('Invalid Payload');
-
-    const user: UserDocument = await this.userService.findUserOrFail(payload.userLogtoId);
-    return this.logtoMapper.toAuthInfo(payload, user);
-  }
-
-  async updateAccount(user: LogtoUser, dto: UpdateAccountDto) {
+  async updateAccount(dto: UpdateUserDto) {
     if (!dto.username) {
-      throw new BadRequestException('Username is required');
+      throw this.logtoException.ERROR_USERNAME_REQUIRED;
     }
-    await this.logtoRequests.updateUserProfile(user.id, dto);
+    return;
   }
 
   async updatePassword(user: LogtoUser, updateUserPasswordDto: UpdateUserPasswordDto) {
     if (user.hasPassword && updateUserPasswordDto.oldPassword) {
       const isPasswordValid = await this.logtoRequests.verifyUserPassword(user.id, updateUserPasswordDto.oldPassword);
       if (!isPasswordValid) {
-        throw new BadRequestException('Invalid old password');
+        throw this.logtoException.ERROR_INVALID_USER_PASSWORD;
       }
     }
 
-    return this.logtoRequests.updateUserPassword(user.id, updateUserPasswordDto.newPassword);
+    await this.logtoRequests.updateUserPassword(user.id, updateUserPasswordDto.newPassword);
+    return;
   }
 
   async deleteUser(user: LogtoUser) {
-    return this.logtoRequests.deleteUser(user.id);
+    await this.logtoRequests.deleteUser(user.id);
+    return;
+  }
+
+  async updateUserProfilePicture(userLogtoId: LogtoId, key: string) {
+    await this.logtoRequests.updateUserProfilePicture(userLogtoId, key);
+    return;
+  }
+  async updateUserRole(userLogtoId: LogtoId, roleId: [string]) {
+    await this.logtoRequests.updateRoleToUser(userLogtoId, roleId);
+    return;
+  }
+
+  async getRoles() {
+    return await this.logtoRequests.getRoles();
   }
 }

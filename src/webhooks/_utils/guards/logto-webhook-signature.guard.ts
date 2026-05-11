@@ -1,12 +1,17 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
-import { type CanActivate, type ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { EnvironmentVariables } from '../../../_utils/config/env.config';
 import { LogtoPayload } from '../../../logto/_utils/schemas/logto-payload.types';
+import { LogtoExceptions } from '../../../logto/_utils/errors/logto-exceptions.types';
+import { WebhookExceptionsType } from '../errors/webhook-exceptions.type';
 
 @Injectable()
 export class LogtoWebhookSignatureGuard implements CanActivate {
-  constructor(private readonly configService: ConfigService<EnvironmentVariables, true>) {}
+  constructor(
+    private readonly configService: ConfigService<EnvironmentVariables, true>,
+    private readonly exceptions: WebhookExceptionsType,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -14,13 +19,13 @@ export class LogtoWebhookSignatureGuard implements CanActivate {
     const body = request.body;
 
     if (!signature) {
-      throw new UnauthorizedException('Missing webhook signature');
+      throw this.exceptions.ERROR_MISSING_WEBHOOK_SIGNATURE;
     }
 
     const isValid = this.verifySignature(body, signature);
 
     if (!isValid) {
-      throw new UnauthorizedException('Invalid webhook signature');
+      throw this.exceptions.ERROR_INVALID_WEBHOOK_SIGNATURE;
     }
 
     return true;
@@ -30,7 +35,7 @@ export class LogtoWebhookSignatureGuard implements CanActivate {
     const signingKey = this.configService.get('LOGTO').LOGTO_WEBHOOK_SIGNING_KEY;
 
     if (!signingKey) {
-      throw new Error('LOGTO_WEBHOOK_SIGNING_KEY is not configured');
+      throw this.exceptions.ERROR_SIGNING_KEY;
     }
 
     const expectedSignature = createHmac('sha256', signingKey).update(JSON.stringify(payload)).digest('hex');

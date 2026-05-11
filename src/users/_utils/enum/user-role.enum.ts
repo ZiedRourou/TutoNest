@@ -1,5 +1,9 @@
 export const UserRoleEnum = {
-  ADMIN: 'ibshcyeo5vluac9a56tao',
-  AUTHOR: 'ibshcyeo5vluac9a56tao',
-  LECTOR: 'ibshcyeo5vluac9a56tao',
+  ADMIN: 'ADMIN',
+  AUTHOR: 'AUTHOR',
+  LECTOR: 'LECTOR',
 } as const satisfies Record<string, string>;
+
+const { ADMIN, ...assignableRoles } = UserRoleEnum;
+
+export const UserRoleAssignableEnum = assignableRoles;

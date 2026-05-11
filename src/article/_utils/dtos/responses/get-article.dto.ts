@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import type { ArticleCategoryEnumValueType } from '../../types/article-category.type';
 import type { MongoId } from '../../../../_utils/types/mongo-id.type';
+import { RustfsFile } from '../../../../rustfs/rustfs.schema';
 
 export class GetArticleDto {
   @ApiProperty()
@@ -14,4 +15,7 @@ export class GetArticleDto {
 
   @ApiProperty()
   category: ArticleCategoryEnumValueType;
+
+  @ApiProperty({ nullable: true })
+  image: RustfsFile | null;
 }

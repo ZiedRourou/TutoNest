@@ -1,5 +1,5 @@
 export const EnvironmentEnum = {
-  Development: 'development',
-  Production: 'production',
-  Test: 'test',
+  DEVELOPMENT: 'DEVELOPMENT',
+  PRODUCTION: 'PRODUCTION',
+  LOCAL: 'LOCAL',
 } as const satisfies Record<string, string>;

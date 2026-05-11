@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { ArticleRepository } from './article.repository';
 import { CreateArticleDto } from './_utils/dtos/requests/create-article.dto';
@@ -8,28 +8,58 @@ import { ArticlesMapper } from './articles.mapper';
 import { ArticleDocument } from './_utils/schemas/article.schema';
 import { MongoId } from '../_utils/types/mongo-id.type';
 import { assertIsAuthor } from '../_utils/functions/is-author-function';
-import { ARTICLE_NAME_ERROR } from '../_utils/constants';
-import { Types } from 'mongoose';
 import { DocumentEnum } from 'src/_utils/enums/document_category.enum';
+import { RustfsService } from '../rustfs/rustfs.service';
+import { RustfsMapper } from '../rustfs/rustfs.mapper';
+import { RustfsFile } from '../rustfs/rustfs.schema';
 
 @Injectable()
 export class ArticleService {
   constructor(
     private readonly articleRepository: ArticleRepository,
     private readonly articleMapper: ArticlesMapper,
+    private readonly rustfsService: RustfsService,
+    private readonly rustfsMapper: RustfsMapper,
   ) {}
 
   async createArticle(createArticleDto: CreateArticleDto, user: UserDocument) {
-    const newArticle = await this.articleRepository.createArticle(createArticleDto, user._id);
+    let uploadImage: RustfsFile | null = null;
+
+    if (createArticleDto.image) {
+      const key = this.rustfsMapper.toUserProfilePictureKey(user.id, createArticleDto.image.extension);
+      uploadImage = await this.rustfsService.uploadFile({
+        fileOrBuffer: createArticleDto.image,
+        key: key,
+      });
+    }
+
+    const newArticle = await this.articleRepository.createArticle(
+      { ...createArticleDto, image: uploadImage },
+      user._id,
+    );
 
     return this.articleMapper.toGetArticleDto(newArticle);
   }
 
   async updateArticle(article: ArticleDocument, updateArticleDto: UpdateArticleDto, user: UserDocument) {
-    assertIsAuthor(article._id, user._id, DocumentEnum.ARTICLE);
-    const updatedArticle = await this.articleRepository.updateOrFailArticle(article._id, updateArticleDto);
+    let uploadImage: RustfsFile | null = null;
 
-    return this.articleMapper.toGetArticleDto(updatedArticle);
+    assertIsAuthor(article._id, user._id, DocumentEnum.ARTICLE);
+
+    if (updateArticleDto.image) {
+      const key = this.rustfsMapper.toUserProfilePictureKey(user.id, updateArticleDto.image.extension);
+      uploadImage = await this.rustfsService.uploadFile({
+        fileOrBuffer: updateArticleDto.image,
+        key: key,
+      });
+    }
+
+    const updateArticle = await this.articleRepository.updateOrFailArticle(article.id, {
+      ...updateArticleDto,
+      image: uploadImage,
+    });
+
+    return this.articleMapper.toGetArticleDto(updateArticle);
   }
   async toggleLike(article: ArticleDocument, user: UserDocument, like: boolean) {
     const isAlreadyLiked = await this.isUserAlreadyLikeArticle(article._id, user._id);

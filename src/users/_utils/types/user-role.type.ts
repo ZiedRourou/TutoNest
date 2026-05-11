@@ -1,4 +1,4 @@
-import { UserRoleEnum } from '../enum/user-role.enum';
+import { UserRoleAssignableEnum, UserRoleEnum } from '../enum/user-role.enum';
 
 export type UserRoleEnumValueType = (typeof UserRoleEnum)[keyof typeof UserRoleEnum];
-export type NonAdminRoleEnumValueType = Exclude<UserRoleEnumValueType, typeof UserRoleEnum.ADMIN>;
+export type UserRoleAssignableEnumValueType = (typeof UserRoleAssignableEnum)[keyof typeof UserRoleAssignableEnum];
