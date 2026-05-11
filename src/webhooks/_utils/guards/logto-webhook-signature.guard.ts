@@ -4,12 +4,13 @@ import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/com
 import { EnvironmentVariables } from '../../../_utils/config/env.config';
 import { LogtoPayload } from '../../../logto/_utils/schemas/logto-payload.types';
 import { LogtoExceptions } from '../../../logto/_utils/errors/logto-exceptions.types';
+import { WebhookExceptionsType } from '../errors/webhook-exceptions.type';
 
 @Injectable()
 export class LogtoWebhookSignatureGuard implements CanActivate {
   constructor(
     private readonly configService: ConfigService<EnvironmentVariables, true>,
-    private readonly exceptions: LogtoExceptions,
+    private readonly exceptions: WebhookExceptionsType,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {

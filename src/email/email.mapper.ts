@@ -9,6 +9,29 @@ import { EmailExceptionsTypes } from './_utils/errors/email-exceptions.types';
 
 @Injectable()
 export class EmailMapper {
+  private readonly emailMapData: Map<EmailTemplateEnumValueType, EmailMeta> = new Map([
+    [
+      EmailTemplateEnum.WELCOME,
+      {
+        subject: 'Bienvenue sur le Blog !',
+        context: dto => ({ username: dto.username, email: dto.email }),
+      },
+    ],
+    [
+      EmailTemplateEnum.UPDATE_PROFILE,
+      {
+        subject: 'Mise à jour de votre profil',
+        context: dto => ({ username: dto.username }),
+      },
+    ],
+    [
+      EmailTemplateEnum.DELETE_ACCOUNT,
+      {
+        subject: 'Confirmation de suppression de compte',
+        context: dto => ({ username: dto.username }),
+      },
+    ],
+  ]);
   private readonly senderEmail: string;
   private readonly senderName: string;
   private readonly emailExceptions: EmailExceptionsTypes;
@@ -32,7 +55,7 @@ export class EmailMapper {
   }
 
   private buildEmail(template: EmailTemplateEnumValueType, dto: UserLogtoEmailTypes) {
-    const emailConfig = this.emailMetaMap.get(template);
+    const emailConfig = this.emailMapData.get(template);
     if (!emailConfig) throw this.emailExceptions.ERROR_EMAIL_META_REQUIRED;
 
     return {
@@ -43,29 +66,4 @@ export class EmailMapper {
       context: emailConfig.context(dto),
     };
   }
-
-  //c'est mieux de faire map ou record ici?
-  private readonly emailMetaMap = new Map<EmailTemplateEnumValueType, EmailMeta>([
-    [
-      EmailTemplateEnum.WELCOME,
-      {
-        subject: 'Bienvenue sur le Blog !',
-        context: dto => ({ username: dto.username, email: dto.email }),
-      },
-    ],
-    [
-      EmailTemplateEnum.UPDATE_PROFILE,
-      {
-        subject: 'Mise à jour de votre profil',
-        context: dto => ({ username: dto.username }),
-      },
-    ],
-    [
-      EmailTemplateEnum.DELETE_ACCOUNT,
-      {
-        subject: 'Confirmation de suppression de compte',
-        context: dto => ({ username: dto.username }),
-      },
-    ],
-  ]);
 }

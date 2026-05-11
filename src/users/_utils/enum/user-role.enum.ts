@@ -4,7 +4,6 @@ export const UserRoleEnum = {
   LECTOR: 'LECTOR',
 } as const satisfies Record<string, string>;
 
-export const UserRoleAssignableEnum = {
-  AUTHOR: 'AUTHOR',
-  LECTOR: 'LECTOR',
-} as const satisfies Record<string, string>;
+const { ADMIN, ...assignableRoles } = UserRoleEnum;
+
+export const UserRoleAssignableEnum = assignableRoles;

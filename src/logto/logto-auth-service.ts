@@ -5,9 +5,9 @@ import { AuthInfo } from 'src/logto/_utils/types/auth-info.types';
 import { decodeLogtoPayload, LogtoPayload } from './_utils/schemas/logto-payload.types';
 import { LogtoMapper } from './logto.mapper';
 import type { Jwks, JwksUris } from './_utils/types/jwks-set.types';
-import UsersService from '../users/users.service';
 import { UserDocument } from '../users/users.schema';
 import { LogtoExceptions } from './_utils/errors/logto-exceptions.types';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class LogtoAuthService {

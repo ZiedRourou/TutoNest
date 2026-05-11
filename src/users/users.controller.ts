@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import UsersService from './users.service';
 import { Protect } from '../logto/_utils/decorators/protect.decorator';
 import { UserByIdPipe } from './_utils/pipes/user-by-id.pipe';
 import { UserRoleEnum } from './_utils/enum/user-role.enum';
@@ -11,6 +10,7 @@ import type { LogtoUser } from '../logto/_utils/types/responses/responses.type';
 import { UpdateUserDto } from './_utils/dtos/requests/update-user-dto';
 import { UpdateUserPasswordDto } from './_utils/dtos/requests/update-user-password.dto';
 import { FormDataRequest } from 'nestjs-form-data';
+import { UsersService } from './users.service';
 
 @ApiTags('Users')
 @Controller('users')
@@ -36,7 +36,6 @@ export class UsersController {
   @ApiBearerAuth('access-token')
   @Protect()
   @ApiConsumes('multipart/form-data')
-  @FormDataRequest()
   @HttpCode(HttpStatus.NO_CONTENT)
   updateAccount(@ConnectedUser() user: UserDocument, @Body() dto: UpdateUserDto) {
     return this.usersService.updateAccount(user, dto);

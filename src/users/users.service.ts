@@ -6,21 +6,19 @@ import { LogtoService } from '../logto/logto.service';
 import { UserExceptionsTypes } from './_utils/errors/user-exceptions.types';
 import { LogtoUser } from '../logto/_utils/types/responses/responses.type';
 import { UpdateUserDto } from './_utils/dtos/requests/update-user-dto';
-import { LogtoRequests } from '../logto/logto.requests';
 import { UpdateUserPasswordDto } from './_utils/dtos/requests/update-user-password.dto';
 import { LogtoId } from '../logto/_utils/types/logto.types';
 import { RustfsService } from '../rustfs/rustfs.service';
 import { RustfsMapper } from '../rustfs/rustfs.mapper';
 
 @Injectable()
-class UsersService {
+export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly usersMapper: UsersMapper,
     @Inject(forwardRef(() => LogtoService))
     private readonly logtoService: LogtoService,
     private readonly userException: UserExceptionsTypes,
-    private readonly logtoRequests: LogtoRequests,
     private readonly rustfsService: RustfsService,
     private readonly rustfsMapper: RustfsMapper,
   ) {}
@@ -57,20 +55,17 @@ class UsersService {
   }
 
   async updateAccount(user: UserDocument, dto: UpdateUserDto) {
-    // j'ai fait l'upload de l'avatar et j'ai récupérer les info (rustflfile)
-    //j'envoi l'url  a logto pour save
-    // mais je save l'image localement ici plutôt qu'en attendant le webhook
-    //tu en pense quoi
-
     const uploadImage = await this.updateAvatar(user, dto);
 
     await this.updateRole(user, dto);
 
     const avatar = uploadImage ?? null;
-    await this.logtoService.updateAccount(user, dto);
-    await this.usersRepository.updateUser(user.id, { ...dto, avatar });
 
-    //je return le user ?
+    await Promise.all([
+      this.logtoService.updateAccount(dto),
+      this.usersRepository.updateUser(user.id, { ...dto, avatar }),
+    ]);
+
     return;
   }
 
@@ -89,32 +84,26 @@ class UsersService {
   }
 
   private async updateAvatar(user: UserDocument, dto: UpdateUserDto) {
-    if (!dto.avatar) return undefined;
+    if (!dto.avatar) return;
+    const key = this.rustfsMapper.toUserProfilePictureKey(user.id, dto.avatar.extension);
 
-    const uploadImage = await this.rustfsService.uploadFile(
-      dto.avatar,
-      null,
-      this.rustfsMapper.toUserProfilePictureKey(user.id, dto.avatar.extension),
-    );
+    const uploadImage = await this.rustfsService.uploadFile({
+      fileOrBuffer: dto.avatar,
+      key,
+    });
 
-    await this.logtoRequests.updateUserProfilePicture(
-      user.userLogtoId,
-      this.rustfsMapper.toGetProfilePictureUrl(user.id, dto.avatar.extension),
-    );
+    await this.logtoService.updateUserProfilePicture(user.userLogtoId, key);
 
     return uploadImage;
   }
 
-  //je peux appeler logto request ici ou je passe par le service ?
   private async updateRole(user: UserDocument, dto: UpdateUserDto): Promise<void> {
     if (!dto.role) return;
 
-    const allRoles = await this.logtoRequests.getRoles();
+    const allRoles = await this.logtoService.getRoles();
     const newRole = allRoles.find(role => role.name === dto.role);
 
     if (!newRole) throw this.userException.ERROR_NOT_FOUND_ROLE_LOGTO;
-    await this.logtoRequests.updateRoleToUser(user.userLogtoId, [newRole.id]);
+    await this.logtoService.updateUserRole(user.userLogtoId, [newRole.id]);
   }
 }
-
-export default UsersService;

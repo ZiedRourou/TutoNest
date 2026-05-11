@@ -16,6 +16,6 @@ export class GetArticleDto {
   @ApiProperty()
   category: ArticleCategoryEnumValueType;
 
-  @ApiProperty()
-  image?: RustfsFile | null;
+  @ApiProperty({ nullable: true })
+  image: RustfsFile | null;
 }

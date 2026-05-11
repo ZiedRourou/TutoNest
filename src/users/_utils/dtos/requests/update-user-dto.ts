@@ -4,8 +4,8 @@ import { HasMimeType, IsFile, MaxFileSize, MemoryStoredFile } from 'nestjs-form-
 import { toMB } from '../../../../_utils/file-size.helpers';
 import { IMAGES_MIME_TYPES } from '../../../../_utils/mime-type.constants';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRoleAssignableEnum } from '../../enum/user-role.enum';
 import { type UserRoleAssignableEnumValueType } from '../../types/user-role.type';
+import { UserRoleAssignableEnum } from '../../enum/user-role.enum';
 
 export class UpdateUserDto {
   @ApiProperty({

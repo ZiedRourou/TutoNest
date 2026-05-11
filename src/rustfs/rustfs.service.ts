@@ -8,25 +8,22 @@ import {
   GetObjectCommand,
   HeadBucketCommand,
   HeadObjectCommand,
-  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
   UploadPartCommand,
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Readable } from 'stream';
 import { EnvironmentVariables, RustfsConfig } from '../_utils/config/env.config';
 import { RUSTFS_CLIENT_TOKEN } from '../_utils/constants';
-import { MemoryStoredFile } from 'nestjs-form-data';
-import { RustfsFile } from './rustfs.schema';
 import { RustfsExceptionsTypes } from './_utils/errors/rustfs-exceptions.types';
+import { FileUploads, PartType } from './_utils/types/file-upload.type';
+import { RustfsFile } from './rustfs.schema';
 
 @Injectable()
 export class RustfsService {
   private readonly BUCKET_NAME: string;
-  private readonly RUSTFS_PRESIGNED_URL_EXPIRATION_TIME = 3600;
   private readonly CHUNK_SIZE = 5 * 1024 * 1024;
   private readonly exceptions: RustfsExceptionsTypes;
 
@@ -38,12 +35,9 @@ export class RustfsService {
     this.BUCKET_NAME = this.configService.get<RustfsConfig>('RUSTFS').RUSTFS_BUCKET_NAME;
   }
 
-  uploadFile = async (
-    fileOrBuffer: MemoryStoredFile,
-    bucket: string | null,
-    key: string,
-    fileName?: string,
-  ): Promise<RustfsFile | undefined> => {
+  uploadFile(file: FileUploads) {
+    const { fileOrBuffer, fileName, key } = file;
+    let bucket = file.bucket;
     const buffer = fileOrBuffer.buffer;
     const size = fileOrBuffer.size;
     const mimetype = fileOrBuffer.mimetype;
@@ -52,19 +46,14 @@ export class RustfsService {
     if (!bucket) bucket = this.BUCKET_NAME;
 
     if (size <= this.CHUNK_SIZE) {
-      return this.uploadSinglePart(bucket, key, buffer, mimetype, originalName, size);
+      return this.uploadSinglePart({ bucket, key, buffer, mimetype, originalName, size });
     }
-    return this.uploadMultipart(bucket, key, buffer, mimetype, originalName, size);
-  };
+    return this.uploadMultipart({ bucket, key, buffer, mimetype, originalName, size });
+  }
 
-  private uploadSinglePart = async (
-    bucket: string,
-    key: string,
-    buffer: Buffer,
-    mimetype: string,
-    originalName: string,
-    size: number,
-  ): Promise<RustfsFile | undefined> => {
+  private async uploadSinglePart(part: PartType) {
+    const { buffer, mimetype, originalName, size, bucket, key } = part;
+
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
@@ -81,10 +70,12 @@ export class RustfsService {
         fileName: originalName,
         mimeType: mimetype,
         createdAt: new Date(),
-        size: size,
+        updatedAt: new Date(),
+        sizeBytes: size,
       };
     } catch (error) {
       if (error.name === 'NoSuchBucket') {
+        if (!bucket) throw this.exceptions.ERROR__MULTIPART_UPLOAD;
         await this.createBucket(bucket);
         return this.s3Client?.send(command).then(() => ({
           bucket: bucket,
@@ -92,22 +83,17 @@ export class RustfsService {
           fileName: originalName,
           mimeType: mimetype,
           createdAt: new Date(),
-          size: size,
+          updatedAt: new Date(),
+          sizeBytes: size,
         }));
       }
       throw error;
     }
-  };
+  }
 
-  private uploadMultipart = async (
-    bucket: string,
-    key: string,
-    buffer: Buffer,
-    mimetype: string,
-    originalName: string,
-    size: number,
-  ): Promise<RustfsFile | undefined> => {
+  private async uploadMultipart(part: PartType) {
     let uploadId: string | undefined;
+    const { buffer, mimetype, originalName, size, bucket, key } = part;
     const parts: { ETag: string; PartNumber: number }[] = [];
 
     try {
@@ -166,12 +152,21 @@ export class RustfsService {
         fileName: originalName,
         mimeType: mimetype,
         createdAt: new Date(),
-        size: size,
+        updatedAt: new Date(),
+        sizeBytes: size,
       };
     } catch (error) {
       if (error.name === 'NoSuchBucket') {
+        if (!bucket) throw this.exceptions.ERROR__MULTIPART_UPLOAD;
         await this.createBucket(bucket);
-        return await this.uploadMultipart(bucket, key, buffer, mimetype, originalName, size);
+        return await this.uploadMultipart({
+          bucket,
+          key,
+          buffer,
+          mimetype,
+          originalName,
+          size,
+        });
       }
 
       if (uploadId) {
@@ -187,20 +182,6 @@ export class RustfsService {
 
       throw error;
     }
-  };
-
-  async getPresignedUrl(key: string, bucket?: string) {
-    // Bucket should never be undefined, but verification is made to avoid breaking changes with old system (condition may be deleted on new deployment + S3 reset)
-    if (!bucket) bucket = this.BUCKET_NAME;
-
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: key,
-    });
-
-    return getSignedUrl(this.s3Client, command, {
-      expiresIn: this.RUSTFS_PRESIGNED_URL_EXPIRATION_TIME,
-    });
   }
 
   async getStats(objectKey: string, bucket?: string) {
@@ -241,16 +222,6 @@ export class RustfsService {
     return response.Body as Readable;
   }
 
-  copyFile(sourceKey: string, destinationKey: string, bucket: string) {
-    const command = new CopyObjectCommand({
-      Bucket: bucket,
-      Key: destinationKey,
-      CopySource: encodeURI(`${bucket}/${sourceKey}`),
-    });
-
-    return this.s3Client.send(command);
-  }
-
   deleteFiles(keys: string[], bucket: string) {
     const command = new DeleteObjectsCommand({
       Bucket: bucket,
@@ -288,76 +259,5 @@ export class RustfsService {
         throw error;
       }
     }
-  }
-
-  async copyPrefix(source: string, destinationPrefix: string, bucket?: string) {
-    if (!bucket && source.includes('/')) {
-      const [srcBucket, ...keyParts] = source.split('/');
-      bucket = srcBucket;
-      source = keyParts.join('/');
-    }
-    const src = source.endsWith('/') ? source : `${source}/`;
-
-    const [dstBucket, ...dstKeyParts] = destinationPrefix.split('/');
-    const dstKey = dstKeyParts.join('/');
-    const dst = dstKey.endsWith('/') ? dstKey : `${dstKey}/`;
-
-    let continuationToken: string | undefined;
-    do {
-      const listResponse = await this.s3Client.send(
-        new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: src,
-          ContinuationToken: continuationToken,
-        }),
-      );
-      const objects = listResponse.Contents ?? [];
-      const copyTasks = objects.map(object => {
-        if (!object.Key || object.Key.endsWith('/')) return Promise.resolve();
-        const newKey = object.Key.replace(src, dst);
-        return this.s3Client.send(
-          new CopyObjectCommand({
-            Bucket: dstBucket,
-            Key: newKey,
-            CopySource: encodeURI(`${bucket}/${object.Key}`),
-          }),
-        );
-      });
-      await Promise.all(copyTasks);
-      continuationToken = listResponse.NextContinuationToken;
-    } while (continuationToken);
-  }
-
-  async getFolderSize(prefix: string, bucket?: string): Promise<number> {
-    // in bytes
-    if (!bucket && prefix.includes('/')) {
-      const [srcBucket, ...keyParts] = prefix.split('/');
-      bucket = srcBucket;
-      prefix = keyParts.join('/');
-    }
-
-    if (!bucket) bucket = this.BUCKET_NAME;
-
-    const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`;
-    let totalSize = 0;
-    let continuationToken: string | undefined;
-
-    do {
-      const listResponse = await this.s3Client.send(
-        new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: normalizedPrefix,
-          ContinuationToken: continuationToken,
-        }),
-      );
-
-      for (const object of listResponse.Contents ?? []) {
-        totalSize += object.Size ?? 0;
-      }
-
-      continuationToken = listResponse.NextContinuationToken;
-    } while (continuationToken);
-
-    return totalSize;
   }
 }

@@ -12,7 +12,6 @@ import type { LogtoClient } from 'src/logto/_utils/types/logto.types';
 import { LogtoResponseType } from 'src/logto/_utils/types/responses/responses.type';
 import { LogtoExceptions } from './_utils/errors/logto-exceptions.types';
 import { MongoId } from '../_utils/types/mongo-id.type';
-import { UpdateUserDto } from '../users/_utils/dtos/requests/update-user-dto';
 
 @Injectable()
 export class LogtoRequests {
@@ -20,24 +19,6 @@ export class LogtoRequests {
     @Inject(LOGTO_CLIENT_TOKEN) private readonly logtoClient: LogtoClient,
     private readonly exceptions: LogtoExceptions,
   ) {}
-
-  updateUserProfile(userId: MongoId, dto: UpdateUserDto) {
-    if (!dto.username) throw this.exceptions.ERROR_USERNAME_REQUIRED;
-
-    return this.handleResponse(
-      this.logtoClient.PATCH(`/api/users/{userId}/profile`, {
-        params: {
-          path: { userId: userId.toString() },
-        },
-        body: {
-          profile: {
-            preferredUsername: dto.username,
-          },
-        },
-      }),
-      this.exceptions.ERROR_UPDATE_USER,
-    );
-  }
 
   deleteUser(userId: MongoId) {
     return this.handleResponse(

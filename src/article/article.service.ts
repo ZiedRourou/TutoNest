@@ -23,33 +23,40 @@ export class ArticleService {
   ) {}
 
   async createArticle(createArticleDto: CreateArticleDto, user: UserDocument) {
-    let uploadImage: RustfsFile | undefined;
+    let uploadImage: RustfsFile | null = null;
 
     if (createArticleDto.image) {
       const key = this.rustfsMapper.toUserProfilePictureKey(user.id, createArticleDto.image.extension);
-      uploadImage = await this.rustfsService.uploadFile(createArticleDto.image, null, key);
+      uploadImage = await this.rustfsService.uploadFile({
+        fileOrBuffer: createArticleDto.image,
+        key: key,
+      });
     }
 
-    const image = uploadImage ?? null;
-    const newArticle = await this.articleRepository.createArticle({ ...createArticleDto, image: image }, user._id);
+    const newArticle = await this.articleRepository.createArticle(
+      { ...createArticleDto, image: uploadImage },
+      user._id,
+    );
+
     return this.articleMapper.toGetArticleDto(newArticle);
   }
 
   async updateArticle(article: ArticleDocument, updateArticleDto: UpdateArticleDto, user: UserDocument) {
-    let uploadImage: RustfsFile | undefined;
+    let uploadImage: RustfsFile | null = null;
 
     assertIsAuthor(article._id, user._id, DocumentEnum.ARTICLE);
 
     if (updateArticleDto.image) {
       const key = this.rustfsMapper.toUserProfilePictureKey(user.id, updateArticleDto.image.extension);
-      uploadImage = await this.rustfsService.uploadFile(updateArticleDto.image, null, key);
+      uploadImage = await this.rustfsService.uploadFile({
+        fileOrBuffer: updateArticleDto.image,
+        key: key,
+      });
     }
-
-    const image = uploadImage ?? null;
 
     const updateArticle = await this.articleRepository.updateOrFailArticle(article.id, {
       ...updateArticleDto,
-      image: image,
+      image: uploadImage,
     });
 
     return this.articleMapper.toGetArticleDto(updateArticle);

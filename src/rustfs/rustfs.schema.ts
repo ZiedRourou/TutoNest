@@ -1,24 +1,25 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema({ _id: false })
+@Schema({ timestamps: true, versionKey: false })
 export class RustfsFile {
   @Prop({ required: true })
-  bucket: string
+  bucket: string;
 
   @Prop({ required: true })
-  key: string
+  key: string;
 
   @Prop({ required: true })
-  fileName: string
+  fileName: string;
 
   @Prop({ required: true })
-  mimeType: string
+  mimeType: string;
 
   @Prop({ required: true })
-  createdAt: Date
+  sizeBytes: number;
 
-  @Prop({ required: true })
-  size: number
+  updatedAt: Date;
+
+  createdAt: Date;
 }
 
-export const RustfsFileSchema = SchemaFactory.createForClass(RustfsFile)
+export const RustfsFileSchema = SchemaFactory.createForClass(RustfsFile);
